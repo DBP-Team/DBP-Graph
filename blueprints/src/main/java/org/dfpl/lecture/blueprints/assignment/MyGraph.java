@@ -66,6 +66,7 @@ public class MyGraph implements Graph {
         // {"k1": "test1_value"} -> HashMap<String, Object> properties;
         // how to convert .. :(
         //Vertex v = new MyVertex(rs.getString("vertex_id"), rs.getObject("properties"));
+        // for github rule test
         Vertex v = new MyVertex(rs.getString("vertex_id"));
         return v;
     }
