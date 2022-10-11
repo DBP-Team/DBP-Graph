@@ -1,11 +1,9 @@
 package org.dfpl.lecture.blueprints.assignment;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.codehaus.jettison.json.JSONObject;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -44,8 +42,8 @@ public class MyGraph implements Graph {
     @Override
     public Vertex addVertex(String id) throws IllegalArgumentException, SQLException {
         Vertex v = null;
-        try{
-            String query = "INSERT INTO verticies values('"+ id + "', null);";
+        try {
+            String query = "INSERT INTO verticies values('" + id + "', null);";
             stmt.executeQuery(query); // id duplication check ?
             return new MyVertex(id);
         } catch (SQLException e) {
@@ -56,6 +54,11 @@ public class MyGraph implements Graph {
 
     @Override
     public Vertex getVertex(String id) throws SQLException {
+        /**
+         * mariaDB에서 vertices 값들을 불러와서
+         * 그 중 properties를 바로 HashMap으로 변환시켜주고
+         * MyVertex 생성자에 같이 넣어줍니다.
+         */
         HashMap<String, Object> map = null;
         ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
         try {
