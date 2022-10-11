@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.codehaus.jettison.json.JSONObject;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -58,11 +56,6 @@ public class MyGraph implements Graph {
 
     @Override
     public Vertex getVertex(String id) throws SQLException {
-        /*
-            mariaDB에서 vertices 값들을 불러와서
-            그 중 properties를 바로 HashMap으로 변환시켜주고
-            MyVertex 생성자에 같이 넣어줍니다.
-         */
         HashMap<String, Object> map = null;
         ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
         try {
@@ -71,9 +64,17 @@ public class MyGraph implements Graph {
             else
                 return null;
         } catch (NullPointerException e) {
+            /**
+             * new ObjectMapper().readValue(null, HashMap.class); 시 NullPointerException
+             */
             Vertex v = new MyVertex(id);
             return v;
         } catch (Exception e) {
+            /**
+             * JsonMappingException
+             * JsonParseException
+             * IOException
+             */
             System.out.println("occur Exception: " + e);
         }
         Vertex v = new MyVertex(id, map);
