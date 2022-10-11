@@ -26,12 +26,18 @@ public class App {
         Vertex v2 = g.addVertex("v2");
         Vertex vv2 = g.addVertex("v2"); // duplicate check
         Vertex v3 = g.addVertex("v3");
-        
-        // insert into json_test values (2 , json_object('k1' , 'test1_value')) ;
+
         v3.setProperty("k1", "test1_value");
+        v3.setProperty("k2", "test2_value");
+        v3.setProperty("k2", "test2_value2");
+        v3.setProperty("k3", "test3_value");
         Edge e1 = new MyEdge("v1|likes|v3", v1, v3, "likes");
 
-        g.getVertex("v3");
+        Vertex check_v3 = g.getVertex("v3");
+        System.out.println("v3's keys: " + check_v3.getPropertyKeys());
+        check_v3.getPropertyKeys().forEach(e -> {
+            System.out.println("v3[" + e + "]: " + check_v3.getProperty(e));
+        });
 
         connection.close();
     }

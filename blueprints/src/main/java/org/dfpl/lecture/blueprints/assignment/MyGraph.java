@@ -1,10 +1,13 @@
 package org.dfpl.lecture.blueprints.assignment;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.sql.*;
 import java.util.Collection;
@@ -55,19 +58,16 @@ public class MyGraph implements Graph {
     @Override
     public Vertex getVertex(String id) throws SQLException {
         ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
-        // SELECT vertex_id FROM verticies WHERE vertex_id="v1";
         rs.next();
-        System.out.println(rs.getString("vertex_id"));
-        System.out.println(rs.getString("properties"));
+        HashMap<String, Object> map = null;
+        try {
+            map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+        } catch (Exception e) {
+            System.out.println("occur Exception: " + e);
+        }
 
-//        JSONParser parser = new JSONParser();
-//        JSONObject json = (JSONObject) parser.parse(stringToParse);
-
-        // {"k1": "test1_value"} -> HashMap<String, Object> properties;
-        // how to convert .. :(
-        //Vertex v = new MyVertex(rs.getString("vertex_id"), rs.getObject("properties"));
-        // for github rule test
-        Vertex v = new MyVertex(rs.getString("vertex_id"));
+        Vertex v = new MyVertex(rs.getString("vertex_id"), map);
+        System.out.println(v.getId());
         return v;
     }
 
