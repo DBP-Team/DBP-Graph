@@ -33,15 +33,42 @@ public class App {
         v3.setProperty("k3", "test3_value");
         Edge e1 = new MyEdge("v1|likes|v3", v1, v3, "likes");
 
+        System.out.println("\ngetPropertyKeys()");
         Vertex check_v3 = g.getVertex("v3");
         System.out.println("v3's keys: " + check_v3.getPropertyKeys());
         check_v3.getPropertyKeys().forEach(e -> {
             System.out.println("v3[" + e + "]: " + check_v3.getProperty(e));
         });
+
+        System.out.println("\nremoveVertex()");
         System.out.println("v2: " + g.getVertex("v2"));
         g.removeVertex(g.getVertex("v2"));
         System.out.println("v2: " + g.getVertex("v2"));
 
+
+        System.out.println("\ngetVertices()");
+        g.getVertices().forEach(e -> {
+            System.out.println("ID: " + e.getId());
+            e.getPropertyKeys().forEach(k -> {
+                System.out.println(e.getId() + "[" + k + "]: " + e.getProperty(k));
+            });
+        });
+
+        System.out.println("\ngetVertices(key, value)");
+        g.getVertices("k1", "test1_value").forEach(e -> {
+            System.out.println("ID: " + e.getId());
+            e.getPropertyKeys().forEach(k -> {
+                System.out.println(e.getId() + "[" + k + "]: " + e.getProperty(k));
+            });
+        });
+
+        System.out.println("\nremoveProperty()");
+        System.out.println("Remove Property v3.k1");
+        v3.removeProperty("k1");
+        v3.getPropertyKeys().forEach(k -> {
+            System.out.println(v3.getId() + "[" + k + "]: " + check_v3.getProperty(k));
+        });
+        v3.removeProperty("k");
         connection.close();
     }
 }

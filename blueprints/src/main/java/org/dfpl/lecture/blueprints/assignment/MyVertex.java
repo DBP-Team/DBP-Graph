@@ -71,7 +71,14 @@ public class MyVertex implements Vertex {
 
     @Override
     public Object removeProperty(String key) {
-
+//        UPDATE verticies SET properties=JSON_REMOVE(properties, '$.k3') WHERE vertex_id='v3';
+        String query = "UPDATE verticies SET properties=JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
+        System.out.println(query);
+        try {
+            MyGraph.stmt.executeUpdate(query);
+        } catch (Exception e) {
+            System.out.println("Exception Occur: " + e);
+        }
         return properties.remove(key);
     }
 

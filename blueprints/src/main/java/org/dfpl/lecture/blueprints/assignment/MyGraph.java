@@ -1,13 +1,9 @@
 package org.dfpl.lecture.blueprints.assignment;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -71,10 +67,13 @@ public class MyGraph implements Graph {
             else
                 return null;
         } catch (NullPointerException e) {
+            /**
+             * new ObjectMapper().readValue(null, HashMap.class); 시 NullPointerException
+             */
             Vertex v = new MyVertex(id);
             return v;
         } catch (Exception e) {
-            System.out.println("occur Exception: " + e);
+            System.out.println("Exception Occur: " + e);
         }
         Vertex v = new MyVertex(id, map);
         return v;
@@ -87,13 +86,11 @@ public class MyGraph implements Graph {
 
     @Override
     public Collection<Vertex> getVertices() throws SQLException {
-        /*
-            Collection 설명
-            https://gangnam-americano.tistory.com/41
-         */
-        Collection<Vertex> arrayList = new ArrayList<Vertex>();
+//      Collection 설명
+//      https://gangnam-americano.tistory.com/41
 
-        ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM vertices;");
+        Collection<Vertex> arrayList = new ArrayList<Vertex>();
+        ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM verticies;");
         while (rs.next()) {
             arrayList.add(this.getVertex(rs.getString(1)));
         }
@@ -102,7 +99,17 @@ public class MyGraph implements Graph {
 
     @Override
     public Collection<Vertex> getVertices(String key, Object value) {
-        return null;
+        Collection<Vertex> arrayList = new ArrayList<Vertex>();
+        try {
+            ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM verticies WHERE JSON_VALUE(properties, \'$." + key + "\')= \'" + value + "\';");
+            while (rs.next()) {
+                arrayList.add(this.getVertex(rs.getString(1)));
+            }
+        } catch (Exception e){
+            System.out.println("Exception Occur: " + e);
+        }
+
+        return arrayList;
     }
 
     @Override
