@@ -10,6 +10,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -62,33 +63,41 @@ public class MyGraph implements Graph {
             그 중 properties를 바로 HashMap으로 변환시켜주고
             MyVertex 생성자에 같이 넣어줍니다.
          */
-        ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
-        rs.next();
         HashMap<String, Object> map = null;
+        ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
         try {
-            map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+            if (rs.next())
+                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+            else
+                return null;
+        } catch (NullPointerException e) {
+            Vertex v = new MyVertex(id);
+            return v;
         } catch (Exception e) {
             System.out.println("occur Exception: " + e);
         }
-
-        Vertex v = new MyVertex(rs.getString("vertex_id"), map);
-        System.out.println(v.getId());
+        Vertex v = new MyVertex(id, map);
         return v;
     }
 
     @Override
     public void removeVertex(Vertex vertex) throws SQLException {
-//        stmt.executeQuery("DELETE FROM verticies WHERE ");
+        stmt.executeQuery("DELETE FROM verticies WHERE vertex_id=\'" + vertex.getId() + "\';");
     }
 
     @Override
     public Collection<Vertex> getVertices() throws SQLException {
+        /*
+            Collection 설명
+            https://gangnam-americano.tistory.com/41
+         */
+        Collection<Vertex> arrayList = new ArrayList<Vertex>();
 
-//        ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM vertices");
-//        while (rs.next()) {
-//
-//        }
-        return null;
+        ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM vertices;");
+        while (rs.next()) {
+            arrayList.add(this.getVertex(rs.getString(1)));
+        }
+        return arrayList;
     }
 
     @Override

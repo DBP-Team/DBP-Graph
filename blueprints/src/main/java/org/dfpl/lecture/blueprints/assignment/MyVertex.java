@@ -71,6 +71,7 @@ public class MyVertex implements Vertex {
 
     @Override
     public Object removeProperty(String key) {
+
         return properties.remove(key);
     }
 

@@ -38,6 +38,9 @@ public class App {
         check_v3.getPropertyKeys().forEach(e -> {
             System.out.println("v3[" + e + "]: " + check_v3.getProperty(e));
         });
+        System.out.println("v2: " + g.getVertex("v2"));
+        g.removeVertex(g.getVertex("v2"));
+        System.out.println("v2: " + g.getVertex("v2"));
 
         connection.close();
     }
