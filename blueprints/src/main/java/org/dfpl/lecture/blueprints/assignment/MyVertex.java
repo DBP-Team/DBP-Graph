@@ -2,9 +2,9 @@ package org.dfpl.lecture.blueprints.assignment;
 
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
-import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,16 +43,41 @@ public class MyVertex implements Vertex {
 
     @Override
     public void setProperty(String key, Object value) throws SQLException {
-        // id 같은 친구 .. 데려다가 수정..
-        // insert into json_test values (2 , json_object('k1' , 'test1_value')) ;
+        /*
+            jsonObject를 update 할 때는 2가지 경우의 수를 나눠야 합니다.
+                a. jsonObject가 비어있을 때 => SET properties=JSON_OBJECT('key', 'value')
+                b. jsonObject안에 값이 있을 때 => SET properties=JSON_SET(properties, '$.key', 'value')
+            그래서 SELECT 로 비어있는지 확인하고 알맞게 query를 사용해야 합니다.
 
-        String query = "UPDATE verticies SET properties=json_object(\'" + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
-        MyGraph.stmt.executeUpdate(query);
-        properties.put(key, value);
+            값이 존재하는데 JSON_OBJECT를 쓰면 이전 값들이 날아가버리고
+            값이 없는데 JSON_SET을 쓰면 업데이트가 되지 않습니다.
+
+            (더 좋은 방법이 있을 순 있는데 일단 이렇게 해놨습니다.)
+         */
+        String executeQuery;
+        String selectQuery = "SELECT COUNT(properties) FROM verticies WHERE vertex_id=\'" + this.id + "\';";
+        ResultSet rs = MyGraph.stmt.executeQuery(selectQuery);
+        rs.next();
+        if (rs.getInt(1) == 0) {
+            executeQuery = "UPDATE verticies SET properties=JSON_OBJECT(\'" + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
+        } else {
+            executeQuery = "UPDATE verticies SET properties=JSON_SET(properties, \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
+        }
+        System.out.println(executeQuery);
+        MyGraph.stmt.executeUpdate(executeQuery);
+        this.properties.put(key, value);
     }
 
     @Override
     public Object removeProperty(String key) {
+//        UPDATE verticies SET properties=JSON_REMOVE(properties, '$.k3') WHERE vertex_id='v3';
+        String query = "UPDATE verticies SET properties=JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
+        System.out.println(query);
+        try {
+            MyGraph.stmt.executeUpdate(query);
+        } catch (Exception e) {
+            System.out.println("Exception Occur: " + e);
+        }
         return properties.remove(key);
     }
 

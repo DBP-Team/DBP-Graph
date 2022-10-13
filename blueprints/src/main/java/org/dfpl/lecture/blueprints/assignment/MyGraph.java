@@ -1,12 +1,12 @@
 package org.dfpl.lecture.blueprints.assignment;
 
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.codehaus.jettison.json.JSONObject;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -33,8 +33,14 @@ public class MyGraph implements Graph {
         }
     }
 
-    public MyGraph(Statement stmt) {
-        this.stmt = stmt;
+    public MyGraph() {
+        try{
+            stmt.executeUpdate("CREATE OR REPLACE DATABASE db1007");
+            stmt.executeUpdate("USE db1007");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
     }
 
     // vertex_id | properties(KEY VALUE)
@@ -42,8 +48,8 @@ public class MyGraph implements Graph {
     @Override
     public Vertex addVertex(String id) throws IllegalArgumentException, SQLException {
         Vertex v = null;
-        try{
-            String query = "INSERT INTO verticies values('"+ id + "', null);";
+        try {
+            String query = "INSERT INTO verticies values('" + id + "', null);";
             stmt.executeQuery(query); // id duplication check ?
             return new MyVertex(id);
         } catch (SQLException e) {
@@ -54,41 +60,69 @@ public class MyGraph implements Graph {
 
     @Override
     public Vertex getVertex(String id) throws SQLException {
+        /**
+         * mariaDB에서 vertices 값들을 불러와서
+         * 그 중 properties를 바로 HashMap으로 변환시켜주고
+         * MyVertex 생성자에 같이 넣어줍니다.
+         */
+        HashMap<String, Object> map = null;
         ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
-        // SELECT vertex_id FROM verticies WHERE vertex_id="v1";
-        rs.next();
-        System.out.println(rs.getString("vertex_id"));
-        System.out.println(rs.getString("properties"));
-
-//        JSONParser parser = new JSONParser();
-//        JSONObject json = (JSONObject) parser.parse(stringToParse);
-
-        // {"k1": "test1_value"} -> HashMap<String, Object> properties;
-        // how to convert .. :(
-        //Vertex v = new MyVertex(rs.getString("vertex_id"), rs.getObject("properties"));
-        // for github rule test
-        Vertex v = new MyVertex(rs.getString("vertex_id"));
+        try {
+            if (rs.next())
+                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+            else
+                return null;
+        } catch (NullPointerException e) {
+            /**
+             * new ObjectMapper().readValue(null, HashMap.class); 시 NullPointerException
+             */
+            Vertex v = new MyVertex(id);
+            return v;
+        } catch (Exception e) {
+            System.out.println("Exception Occur: " + e);
+            /**
+             * JsonMappingException
+             * JsonParseException
+             * IOException
+             */
+            System.out.println("occur Exception: " + e);
+        }
+        Vertex v = new MyVertex(id, map);
         return v;
     }
 
     @Override
     public void removeVertex(Vertex vertex) throws SQLException {
-//        stmt.executeQuery("DELETE FROM verticies WHERE ");
+        stmt.executeQuery("DELETE FROM verticies WHERE vertex_id=\'" + vertex.getId() + "\';");
     }
 
     @Override
     public Collection<Vertex> getVertices() throws SQLException {
+//      Collection 설명
+//      https://gangnam-americano.tistory.com/41
 
-//        ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM vertices");
-//        while (rs.next()) {
-//
-//        }
-        return null;
+        Collection<Vertex> arrayList = new ArrayList<Vertex>();
+        ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM verticies;");
+        while (rs.next()) {
+            arrayList.add(this.getVertex(rs.getString(1)));
+        }
+        return arrayList;
     }
 
     @Override
     public Collection<Vertex> getVertices(String key, Object value) {
-        return null;
+        Collection<Vertex> arrayList = new ArrayList<Vertex>();
+        try {
+            String query = "SELECT vertex_id FROM verticies WHERE JSON_VALUE(properties, \'$." + key + "\')= \'" + value + "\';";
+            System.out.println(query);
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                arrayList.add(this.getVertex(rs.getString(1)));
+            }
+        } catch (Exception e){
+            System.out.println("Exception Occur: " + e);
+        }
+        return arrayList;
     }
 
     @Override
@@ -123,6 +157,6 @@ public class MyGraph implements Graph {
 
     @Override
     public void shutdown() throws SQLException {
-
+        connection.close();
     }
 }
