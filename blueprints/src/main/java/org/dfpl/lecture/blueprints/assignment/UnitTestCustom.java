@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
+import org.dfpl.lecture.blueprints.persistent.PersistentGraph;
 
 import java.sql.SQLException;
 
@@ -11,7 +12,7 @@ public class UnitTestCustom {
 
     public static void main(String[] args) throws SQLException {
 
-        Graph g = new MyGraph();
+        Graph g = new PersistentGraph();
         Vertex v1 = g.addVertex("1");
         System.out.println("[1] " + v1.getId());
         v1 = g.addVertex("1");

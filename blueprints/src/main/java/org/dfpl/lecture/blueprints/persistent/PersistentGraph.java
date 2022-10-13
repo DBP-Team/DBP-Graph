@@ -1,4 +1,4 @@
-package org.dfpl.lecture.blueprints.assignment;
+package org.dfpl.lecture.blueprints.persistent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Edge;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class MyGraph implements Graph {
+public class PersistentGraph implements Graph {
     static String id = "root";
     static String pw = "1234";
     public static Connection connection;
@@ -33,7 +33,7 @@ public class MyGraph implements Graph {
         }
     }
 
-    public MyGraph() {
+    public PersistentGraph() {
         try{
             stmt.executeUpdate("CREATE OR REPLACE DATABASE db1007");
             stmt.executeUpdate("USE db1007");
@@ -51,7 +51,7 @@ public class MyGraph implements Graph {
         try {
             String query = "INSERT INTO verticies values('" + id + "', null);";
             stmt.executeQuery(query); // id duplication check ?
-            return new MyVertex(id);
+            return new PersistentVertex(id);
         } catch (SQLException e) {
             v = this.getVertex(id);
         }
@@ -76,7 +76,7 @@ public class MyGraph implements Graph {
             /**
              * new ObjectMapper().readValue(null, HashMap.class); 시 NullPointerException
              */
-            Vertex v = new MyVertex(id);
+            Vertex v = new PersistentVertex(id);
             return v;
         } catch (Exception e) {
             System.out.println("Exception Occur: " + e);
@@ -87,7 +87,7 @@ public class MyGraph implements Graph {
              */
             System.out.println("occur Exception: " + e);
         }
-        Vertex v = new MyVertex(id, map);
+        Vertex v = new PersistentVertex(id, map);
         return v;
     }
 

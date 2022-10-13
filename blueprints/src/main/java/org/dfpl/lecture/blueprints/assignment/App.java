@@ -2,6 +2,8 @@ package org.dfpl.lecture.blueprints.assignment;
 
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
+import org.dfpl.lecture.blueprints.persistent.PersistentEdge;
+import org.dfpl.lecture.blueprints.persistent.PersistentGraph;
 
 import java.sql.SQLException;
 
@@ -13,7 +15,7 @@ public class App {
     public static void main(String[] args) throws SQLException {
 
 
-        MyGraph g = new MyGraph();
+        PersistentGraph g = new PersistentGraph();
         Vertex v1 = g.addVertex("v1");
         Vertex v2 = g.addVertex("v2");
         Vertex vv2 = g.addVertex("v2"); // duplicate check
@@ -23,7 +25,7 @@ public class App {
         v3.setProperty("k2", "test2_value");
         v3.setProperty("k2", "test2_value2");
         v3.setProperty("k3", "test3_value");
-        Edge e1 = new MyEdge("v1|likes|v3", v1, v3, "likes");
+        Edge e1 = new PersistentEdge("v1|likes|v3", v1, v3, "likes");
 
         System.out.println("\ngetPropertyKeys()");
         Vertex check_v3 = g.getVertex("v3");

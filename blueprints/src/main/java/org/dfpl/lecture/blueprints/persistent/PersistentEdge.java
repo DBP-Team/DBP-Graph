@@ -1,4 +1,4 @@
-package org.dfpl.lecture.blueprints.assignment;
+package org.dfpl.lecture.blueprints.persistent;
 
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
@@ -7,7 +7,7 @@ import com.tinkerpop.blueprints.revised.Vertex;
 import java.util.HashMap;
 import java.util.Set;
 
-public class MyEdge implements Edge {
+public class PersistentEdge implements Edge {
 
     private String id;
     private Vertex outV;
@@ -15,7 +15,7 @@ public class MyEdge implements Edge {
     private String label;
     private HashMap<String, Object> properties;
 
-    public MyEdge(String id, Vertex outV, Vertex inV, String label) {
+    public PersistentEdge(String id, Vertex outV, Vertex inV, String label) {
         this.id = id;
         this.outV = outV;
         this.inV = inV;

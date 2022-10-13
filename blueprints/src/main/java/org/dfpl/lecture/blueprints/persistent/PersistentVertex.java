@@ -1,4 +1,4 @@
-package org.dfpl.lecture.blueprints.assignment;
+package org.dfpl.lecture.blueprints.persistent;
 
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
@@ -10,17 +10,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
-public class MyVertex implements Vertex {
+public class PersistentVertex implements Vertex {
 
     private String id;
     private HashMap<String, Object> properties;
 
-    public MyVertex(String id) {
+    public PersistentVertex(String id) {
         this.id = id;
         this.properties = new HashMap<>();
     }
 
-    public MyVertex(String id, HashMap<String, Object> properties) {
+    public PersistentVertex(String id, HashMap<String, Object> properties) {
         this.id = id;
         this.properties = properties;
     }
@@ -56,7 +56,7 @@ public class MyVertex implements Vertex {
          */
         String executeQuery;
         String selectQuery = "SELECT COUNT(properties) FROM verticies WHERE vertex_id=\'" + this.id + "\';";
-        ResultSet rs = MyGraph.stmt.executeQuery(selectQuery);
+        ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
         rs.next();
         if (rs.getInt(1) == 0) {
             executeQuery = "UPDATE verticies SET properties=JSON_OBJECT(\'" + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
@@ -64,7 +64,7 @@ public class MyVertex implements Vertex {
             executeQuery = "UPDATE verticies SET properties=JSON_SET(properties, \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
         }
         System.out.println(executeQuery);
-        MyGraph.stmt.executeUpdate(executeQuery);
+        PersistentGraph.stmt.executeUpdate(executeQuery);
         this.properties.put(key, value);
     }
 
@@ -74,7 +74,7 @@ public class MyVertex implements Vertex {
         String query = "UPDATE verticies SET properties=JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
         System.out.println(query);
         try {
-            MyGraph.stmt.executeUpdate(query);
+            PersistentGraph.stmt.executeUpdate(query);
         } catch (Exception e) {
             System.out.println("Exception Occur: " + e);
         }
