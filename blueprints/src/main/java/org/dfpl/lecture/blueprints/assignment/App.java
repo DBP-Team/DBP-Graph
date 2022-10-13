@@ -3,10 +3,7 @@ package org.dfpl.lecture.blueprints.assignment;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class App {
 
@@ -14,12 +11,7 @@ public class App {
     static String pw = "1234";
 
     public static void main(String[] args) throws SQLException {
-        Connection connection = MyGraph.connection;
-        Statement stmt = connection.createStatement();
 
-        stmt.executeUpdate("CREATE OR REPLACE DATABASE db1007");
-        stmt.executeUpdate("USE db1007");
-        stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
 
         MyGraph g = new MyGraph();
         Vertex v1 = g.addVertex("v1");
@@ -67,13 +59,6 @@ public class App {
         });
         v3.removeProperty("k");
 
-
-
-
-
-
-
-
-        connection.close();
+        g.shutdown();
     }
 }

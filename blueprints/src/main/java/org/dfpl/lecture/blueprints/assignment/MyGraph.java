@@ -34,6 +34,13 @@ public class MyGraph implements Graph {
     }
 
     public MyGraph() {
+        try{
+            stmt.executeUpdate("CREATE OR REPLACE DATABASE db1007");
+            stmt.executeUpdate("USE db1007");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
     }
 
     // vertex_id | properties(KEY VALUE)
@@ -150,6 +157,6 @@ public class MyGraph implements Graph {
 
     @Override
     public void shutdown() throws SQLException {
-
+        connection.close();
     }
 }

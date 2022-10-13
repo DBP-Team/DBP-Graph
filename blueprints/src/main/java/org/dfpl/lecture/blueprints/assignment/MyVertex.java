@@ -2,7 +2,6 @@ package org.dfpl.lecture.blueprints.assignment;
 
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
-import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
 
 import java.sql.ResultSet;
