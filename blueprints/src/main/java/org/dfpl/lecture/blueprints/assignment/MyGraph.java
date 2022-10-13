@@ -33,8 +33,7 @@ public class MyGraph implements Graph {
         }
     }
 
-    public MyGraph(Statement stmt) {
-        this.stmt = stmt;
+    public MyGraph() {
     }
 
     // vertex_id | properties(KEY VALUE)
@@ -107,14 +106,15 @@ public class MyGraph implements Graph {
     public Collection<Vertex> getVertices(String key, Object value) {
         Collection<Vertex> arrayList = new ArrayList<Vertex>();
         try {
-            ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM verticies WHERE JSON_VALUE(properties, \'$." + key + "\')= \'" + value + "\';");
+            String query = "SELECT vertex_id FROM verticies WHERE JSON_VALUE(properties, \'$." + key + "\')= \'" + value + "\';";
+            System.out.println(query);
+            ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 arrayList.add(this.getVertex(rs.getString(1)));
             }
         } catch (Exception e){
             System.out.println("Exception Occur: " + e);
         }
-
         return arrayList;
     }
 

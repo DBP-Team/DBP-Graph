@@ -21,7 +21,7 @@ public class App {
         stmt.executeUpdate("USE db1007");
         stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
 
-        MyGraph g = new MyGraph(stmt);
+        MyGraph g = new MyGraph();
         Vertex v1 = g.addVertex("v1");
         Vertex v2 = g.addVertex("v2");
         Vertex vv2 = g.addVertex("v2"); // duplicate check
@@ -56,10 +56,7 @@ public class App {
 
         System.out.println("\ngetVertices(key, value)");
         g.getVertices("k1", "test1_value").forEach(e -> {
-            System.out.println("ID: " + e.getId());
-            e.getPropertyKeys().forEach(k -> {
-                System.out.println(e.getId() + "[" + k + "]: " + e.getProperty(k));
-            });
+            System.out.println(e.getId());
         });
 
         System.out.println("\nremoveProperty()");
@@ -69,6 +66,14 @@ public class App {
             System.out.println(v3.getId() + "[" + k + "]: " + check_v3.getProperty(k));
         });
         v3.removeProperty("k");
+
+
+
+
+
+
+
+
         connection.close();
     }
 }
