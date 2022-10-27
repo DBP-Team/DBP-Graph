@@ -30,7 +30,7 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("CREATE OR REPLACE DATABASE " + dbName);
             stmt.executeUpdate("USE "+ dbName);
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE edge (id varchar(50), outV varchar(50), inV varchar(50), label varchar(50), properties json);");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edge (id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -122,7 +122,7 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException {
-        String query = "INSERT INTO edge ('" + inVertex.getId() + "|" + label + "|" + inVertex.getId() + "', '" + inVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
+        String query = "INSERT IGNORE INTO edge ('" + inVertex.getId() + "|" + label + "|" + inVertex.getId() + "', '" + inVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
         return null;
     }
 
