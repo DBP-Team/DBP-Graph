@@ -87,7 +87,7 @@ public interface Graph {
 	 * @param label     edge label
 	 * @return
 	 */
-	public Edge getEdge(Vertex outVertex, Vertex inVertex, String label);
+	public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) throws SQLException;
 
 	/**
 	 * Return the edge referenced by the provided object identifier. If no edge is
