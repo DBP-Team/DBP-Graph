@@ -9,7 +9,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Scanner;
 
 public class PersistentGraph implements Graph {
     static String id;
@@ -120,24 +119,28 @@ public class PersistentGraph implements Graph {
         return arrayList;
     }
 
-    public String makeID(Vertex outVertex, Vertex inVertex, String label) throws NullPointerException, IllegalArgumentException{
+    public void valiedEdgeArgumentCheck(Vertex outVertex, Vertex inVertex, String label) {
         if (label.contains("|"))
             throw new IllegalArgumentException("label cannot contain '|'");
-        if (outVertex == null || inVertex == null)
+        if (outVertex == null)
+            throw new NullPointerException("outVertex cannot be null");
+        if (inVertex == null)
             throw new NullPointerException("inVertex cannot be null");
-        return outVertex.getId() + "|" + label + "|" + inVertex.getId();
+    }
+    public String makeID(String outVertexId, String inVertexId, String label) throws NullPointerException, IllegalArgumentException{
+        return outVertexId + "|" + label + "|" + inVertexId;
     }
 
     @Override
     public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException, SQLException {
-        String id = makeID(outVertex, inVertex, label);
+        valiedEdgeArgumentCheck(outVertex, inVertex, label);
+        String id = makeID(outVertex.getId(), inVertex.getId(), label);
         Edge edge = getEdge(id);
         if (edge != null)
             return edge;
         try {
             edge = new PersistentEdge(id, outVertex, inVertex, label);
             String query = "INSERT IGNORE INTO edges VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
-            System.out.println("test:" + query);
             stmt.executeUpdate(query);
 
         } catch (SQLException e) {
@@ -149,7 +152,7 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) throws SQLException {
-        String edgeID = makeID(outVertex, inVertex, label);
+        String edgeID = makeID(outVertex.getId(), inVertex.getId(), label);
         String query = "SELECT * FROM edges WHERE id=\'" + edgeID + "\'";
         ResultSet rs = stmt.executeQuery(query);
         if (rs.next())
@@ -186,8 +189,22 @@ public class PersistentGraph implements Graph {
     }
 
     @Override
-    public Collection<Edge> getEdges() {
-        return null;
+    public Collection<Edge> getEdges() throws SQLException {
+        String query = "SELECT * FROM edges";
+        ResultSet rs = stmt.executeQuery(query);
+        Collection<Edge> edgeCollection = new ArrayList<Edge>();
+        while (rs.next()) {
+            String outVertexId = rs.getString(2);
+            String inVertexId = rs.getString(3);
+            String label = rs.getString(4);
+            String edgeID = makeID(outVertexId, inVertexId, label);
+
+            Vertex outVertex = getVertex(outVertexId);
+            Vertex inVertex = getVertex(inVertexId);
+
+            edgeCollection.add(new PersistentEdge(edgeID, outVertex, inVertex, label));
+        }
+        return edgeCollection;
     }
 
     @Override

@@ -14,10 +14,11 @@ public class CustomTest_Jang {
         Vertex v2 = g.addVertex("2");
         Vertex v3 = g.addVertex("3");
         g.addEdge(v1, v2, "like");
+        g.addEdge(v1, v3, "like");
         Edge e1 = g.getEdge("1|like|2");
         Edge e2 = g.getEdge(v1, v2, "like");
         Edge e3 = g.getEdge(v1, v2, "like2");
         Edge e4 = g.getEdge("1|like|3");
-        System.out.println(e2);
+        System.out.println(g.getEdges());
     }
 }

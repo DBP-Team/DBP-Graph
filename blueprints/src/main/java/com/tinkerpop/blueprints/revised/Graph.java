@@ -112,7 +112,7 @@ public interface Graph {
 	 *
 	 * @return an iterable reference to all edges in the graph
 	 */
-	public Collection<Edge> getEdges();
+	public Collection<Edge> getEdges() throws SQLException;
 
 	/**
 	 * Return an iterable to all the edges in the graph that have a particular
