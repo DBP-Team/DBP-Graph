@@ -126,17 +126,19 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException {
+        Edge edge;
         try {
             String id = makeID(outVertex, inVertex, label);
-            String query = "INSERT IGNORE INTO edge ('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
+            edge = new PersistentEdge(id, outVertex, inVertex, label);
+            String query = "INSERT IGNORE INTO edge VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
+            System.out.println("test:" + query);
             stmt.executeUpdate(query);
 
         } catch (SQLException e) {
             System.out.println(e);
             return null;
         }
-        //return new PersistentEdge()
-        return null;
+        return edge;
     }
 
     @Override
