@@ -12,7 +12,7 @@ public class UnitTestCustom {
 
     public static void main(String[] args) throws SQLException {
 
-        Graph g = new PersistentGraph(); // test
+        Graph g = new PersistentGraph();
         Vertex v1 = g.addVertex("1");
         System.out.println("[1] " + v1.getId());
         v1 = g.addVertex("1");
