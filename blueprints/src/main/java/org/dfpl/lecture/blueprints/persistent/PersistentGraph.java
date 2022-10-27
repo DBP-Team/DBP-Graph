@@ -128,7 +128,7 @@ public class PersistentGraph implements Graph {
     }
 
     @Override
-    public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException {
+    public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException, SQLException {
         String id = makeID(outVertex, inVertex, label);
         Edge edge = getEdge(id);
         if (edge != null)

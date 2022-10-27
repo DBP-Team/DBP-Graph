@@ -24,6 +24,11 @@ public class PersistentEdge implements Edge {
     }
 
     @Override
+    public String toString() {
+        return id + "/" + outV.getId() + "/" + inV.getId() + "/" + label;
+    }
+
+    @Override
     public Vertex getVertex(Direction direction) throws IllegalArgumentException {
         if (direction.equals(Direction.OUT)) // bug check
             return outV;
@@ -57,6 +62,8 @@ public class PersistentEdge implements Edge {
 
     @Override
     public void setProperty(String key, Object value) {
+
+
         properties.put(key, value);
     }
 
