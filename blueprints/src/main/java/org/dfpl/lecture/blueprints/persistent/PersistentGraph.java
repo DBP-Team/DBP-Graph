@@ -130,7 +130,7 @@ public class PersistentGraph implements Graph {
         try {
             String id = makeID(outVertex, inVertex, label);
             edge = new PersistentEdge(id, outVertex, inVertex, label);
-            String query = "INSERT IGNORE INTO edge VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
+            String query = "INSERT IGNORE INTO edges VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
             System.out.println("test:" + query);
             stmt.executeUpdate(query);
 
@@ -146,27 +146,32 @@ public class PersistentGraph implements Graph {
         String edgeID = makeID(outVertex, inVertex, label);
         String query = "SELECT * FROM edges WHERE id=\'" + edgeID + "\'";
         ResultSet rs = stmt.executeQuery(query);
-        if (rs == null)
+        if (rs.next())
+            return (new PersistentEdge(edgeID, outVertex, inVertex, label));
+        else
             return null;
-        return (new PersistentEdge(edgeID, outVertex, inVertex, label));
+
     }
 
     @Override
     public Edge getEdge(String id) throws SQLException {
         String query = "SELECT * FROM edges WHERE id=\'" + id + "\'";
         ResultSet rs = stmt.executeQuery(query);
-        if (rs == null)
+        if (rs.next())
+        {
+            String[] arr = id.split("\\|");
+            String outVertexString = arr[0];
+            String inVertexString = arr[2];
+            String label = arr[1];
+
+            Vertex outVertex = getVertex(outVertexString);
+            Vertex inVertex = getVertex(inVertexString);
+
+            return (new PersistentEdge(id, outVertex, inVertex, label));
+        }
+        else
             return null;
 
-        String[] arr = id.split("|");
-        String outVertexString = arr[0];
-        String inVertexString = arr[1];
-        String label = arr[2];
-
-        Vertex outVertex = new PersistentVertex(outVertexString);
-        Vertex inVertex = new PersistentVertex(inVertexString);
-
-        return (new PersistentEdge(id, outVertex, inVertex, label));
     }
 
     @Override
