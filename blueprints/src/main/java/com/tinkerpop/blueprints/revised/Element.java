@@ -1,5 +1,6 @@
 package com.tinkerpop.blueprints.revised;
 
+import java.sql.SQLException;
 import java.util.Set;
 
 public interface Element {
@@ -36,7 +37,7 @@ public interface Element {
 	 * @param key   the string key of the property
 	 * @param value the object value o the property
 	 */
-	public void setProperty(String key, Object value);
+	public void setProperty(String key, Object value) throws SQLException;
 
 	/**
 	 * Un-assigns a key/value property from the element. The object value of the

@@ -1,39 +1,37 @@
-package org.dfpl.lecture.blueprints.memory2;
+package org.dfpl.lecture.blueprints.persistent;
 
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
 
+import java.util.HashMap;
 import java.util.Set;
 
-public class MyEdge implements Edge {
+public class PersistentEdge implements Edge {
 
-    private String edgeID;
-    private Vertex outVertex;
-    private Vertex inVertex;
+    private String id;
+    private Vertex outV;
+    private Vertex inV;
     private String label;
+    private HashMap<String, Object> properties;
 
-
-    public MyEdge(String edgeID, Vertex outVertex, Vertex inVertex, String label) {
-        this.edgeID = edgeID;
-        this.outVertex = outVertex;
-        this.inVertex = inVertex;
+    public PersistentEdge(String id, Vertex outV, Vertex inV, String label) {
+        this.id = id;
+        this.outV = outV;
+        this.inV = inV;
         this.label = label;
     }
 
     @Override
-    public String toString() {
-        return outVertex.getId() + "|" + label + "|" + inVertex.getId();
-    }
-
-    @Override
     public Vertex getVertex(Direction direction) throws IllegalArgumentException {
-        return null;
+        if (direction.equals(Direction.OUT)) // bug check
+            return outV;
+        return inV;
     }
 
     @Override
     public String getLabel() {
-        return null;
+        return label;
     }
 
     @Override
@@ -43,26 +41,26 @@ public class MyEdge implements Edge {
 
     @Override
     public String getId() {
-        return null;
+        return id;
     }
 
     @Override
     public Object getProperty(String key) {
-        return null;
+        return properties.get(key);
     }
 
     @Override
     public Set<String> getPropertyKeys() {
-        return null;
+        return properties.keySet();
     }
 
     @Override
     public void setProperty(String key, Object value) {
-
+        properties.put(key, value);
     }
 
     @Override
     public Object removeProperty(String key) {
-        return null;
+        return properties.remove(key);
     }
 }

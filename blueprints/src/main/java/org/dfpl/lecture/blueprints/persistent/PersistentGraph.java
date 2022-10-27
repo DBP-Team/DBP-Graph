@@ -1,54 +1,128 @@
 package org.dfpl.lecture.blueprints.persistent;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class PersistentGraph implements Graph {
+    static String id = "root";
+    static String pw = "1234";
+    public static Connection connection;
 
-    private Connection connection;
-    private Statement statement;
+    static {
+        try {
+            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306", id, pw);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    public PersistentGraph(String url, String id, String password, String dbName) throws SQLException {
-        // url : "jdbc:mariadb://localhost:3306"
-        // id : root
-        // password : 1234
-        connection = DriverManager.getConnection(url, id, password);
-        statement = connection.createStatement();
+    public static Statement stmt;
 
-        statement.executeUpdate("CREATE DATABASE IF NOT EXISTS" + dbName);
-        statement.executeUpdate("USE" + dbName);
+    static {
+        try {
+            stmt = connection.createStatement();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public PersistentGraph() {
+        try{
+            stmt.executeUpdate("CREATE OR REPLACE DATABASE db1007");
+            stmt.executeUpdate("USE db1007");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+
+    // vertex_id | properties(KEY VALUE)
+
+    @Override
+    public Vertex addVertex(String id) throws IllegalArgumentException, SQLException {
+        Vertex v = null;
+        try {
+            String query = "INSERT INTO verticies values('" + id + "', null);";
+            stmt.executeQuery(query); // id duplication check ?
+            return new PersistentVertex(id);
+        } catch (SQLException e) {
+            v = this.getVertex(id);
+        }
+        return v;
     }
 
     @Override
-    public Vertex addVertex(String id) throws IllegalArgumentException {
-        return null;
+    public Vertex getVertex(String id) throws SQLException {
+        /**
+         * mariaDB에서 vertices 값들을 불러와서
+         * 그 중 properties를 바로 HashMap으로 변환시켜주고
+         * MyVertex 생성자에 같이 넣어줍니다.
+         */
+        HashMap<String, Object> map = null;
+        ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
+        try {
+            if (rs.next())
+                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+            else
+                return null;
+        } catch (NullPointerException e) {
+            /**
+             * new ObjectMapper().readValue(null, HashMap.class); 시 NullPointerException
+             */
+            Vertex v = new PersistentVertex(id);
+            return v;
+        } catch (Exception e) {
+            System.out.println("Exception Occur: " + e);
+            /**
+             * JsonMappingException
+             * JsonParseException
+             * IOException
+             */
+            System.out.println("occur Exception: " + e);
+        }
+        Vertex v = new PersistentVertex(id, map);
+        return v;
     }
 
     @Override
-    public Vertex getVertex(String id) {
-        return null;
+    public void removeVertex(Vertex vertex) throws SQLException {
+        stmt.executeQuery("DELETE FROM verticies WHERE vertex_id=\'" + vertex.getId() + "\';");
     }
 
     @Override
-    public void removeVertex(Vertex vertex) {
+    public Collection<Vertex> getVertices() throws SQLException {
+//      Collection 설명
+//      https://gangnam-americano.tistory.com/41
 
-    }
-
-    @Override
-    public Collection<Vertex> getVertices() {
-        return null;
+        Collection<Vertex> arrayList = new ArrayList<Vertex>();
+        ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM verticies;");
+        while (rs.next()) {
+            arrayList.add(this.getVertex(rs.getString(1)));
+        }
+        return arrayList;
     }
 
     @Override
     public Collection<Vertex> getVertices(String key, Object value) {
-        return null;
+        Collection<Vertex> arrayList = new ArrayList<Vertex>();
+        try {
+            String query = "SELECT vertex_id FROM verticies WHERE JSON_VALUE(properties, \'$." + key + "\')= \'" + value + "\';";
+            System.out.println(query);
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                arrayList.add(this.getVertex(rs.getString(1)));
+            }
+        } catch (Exception e){
+            System.out.println("Exception Occur: " + e);
+        }
+        return arrayList;
     }
 
     @Override
