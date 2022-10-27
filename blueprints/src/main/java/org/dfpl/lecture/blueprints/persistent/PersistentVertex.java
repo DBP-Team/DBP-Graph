@@ -71,7 +71,6 @@ public class PersistentVertex implements Vertex {
     public Object removeProperty(String key) {
 //        UPDATE verticies SET properties=JSON_REMOVE(properties, '$.k3') WHERE vertex_id='v3';
         String query = "UPDATE verticies SET properties=JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
-        System.out.println(query);
         try {
             PersistentGraph.stmt.executeUpdate(query);
         } catch (Exception e) {

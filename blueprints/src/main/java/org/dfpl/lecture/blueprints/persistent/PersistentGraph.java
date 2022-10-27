@@ -109,7 +109,6 @@ public class PersistentGraph implements Graph {
         Collection<Vertex> arrayList = new ArrayList<Vertex>();
         try {
             String query = "SELECT vertex_id FROM verticies WHERE JSON_VALUE(properties, \'$." + key + "\')= \'" + value + "\';";
-            System.out.println(query);
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 arrayList.add(this.getVertex(rs.getString(1)));
@@ -120,15 +119,21 @@ public class PersistentGraph implements Graph {
         return arrayList;
     }
 
-    public String makeID(Vertex outVertex, Vertex inVertex, String label) {
+    public String makeID(Vertex outVertex, Vertex inVertex, String label) throws NullPointerException, IllegalArgumentException{
+        if (label.contains("|"))
+            throw new IllegalArgumentException("label cannot contain '|'");
+        if (outVertex == null || inVertex == null)
+            throw new NullPointerException("inVertex cannot be null");
         return outVertex.getId() + "|" + label + "|" + inVertex.getId();
     }
 
     @Override
-    public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException {
-        Edge edge;
+    public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException, SQLException {
+        String id = makeID(outVertex, inVertex, label);
+        Edge edge = getEdge(id);
+        if (edge != null)
+            return edge;
         try {
-            String id = makeID(outVertex, inVertex, label);
             edge = new PersistentEdge(id, outVertex, inVertex, label);
             String query = "INSERT IGNORE INTO edges VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
             System.out.println("test:" + query);
