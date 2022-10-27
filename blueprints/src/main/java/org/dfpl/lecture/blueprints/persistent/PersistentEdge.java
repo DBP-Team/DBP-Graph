@@ -62,7 +62,7 @@ public class PersistentEdge implements Edge {
 
     @Override
     public void setProperty(String key, Object value) {
-
+        
 
         properties.put(key, value);
     }

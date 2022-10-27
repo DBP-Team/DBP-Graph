@@ -44,7 +44,7 @@ public class PersistentGraph implements Graph {
         if (id.contains("|"))
             throw new IllegalArgumentException("id cannot contain '|'");
         try {
-            String query = "INSERT IGNORE INTO verticies values('" + id + "', null);";
+            String query = "INSERT IGNORE INTO verticies values('" + id + "', '{}');";
             stmt.executeQuery(query); // id duplication check ?
             return new PersistentVertex(id);
         } catch (SQLException e) {
