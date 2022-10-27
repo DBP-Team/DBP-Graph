@@ -24,3 +24,6 @@ hs_err_pid*
 
 # .idea folder ignore
 .idea/
+
+# Hyun jin Custom Test File
+CustomTest_Jang.java
