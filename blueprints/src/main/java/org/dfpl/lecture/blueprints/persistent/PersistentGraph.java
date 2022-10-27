@@ -18,16 +18,8 @@ public class PersistentGraph implements Graph {
     public static Connection connection;
     public static Statement stmt;
 
-    public PersistentGraph() {
+    public PersistentGraph(String id, String pw, String dbName) {
         try {
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("ID:");
-            id = scanner.next();
-            System.out.print("Password:");
-            pw = scanner.next();
-            System.out.print("DBName:");
-            dbName = scanner.next();
-
             connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306", id, pw);
             stmt = connection.createStatement();
         } catch (SQLException e) {
@@ -38,6 +30,8 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("CREATE OR REPLACE DATABASE " + dbName);
             stmt.executeUpdate("USE "+ dbName);
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edge (id varchar(50), outV varchar(50), inV varchar(50), label varchar(50), properties json);");
+
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -129,6 +123,7 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException {
+        String query = "INSERT INTO edge ('" + inVertex.getId() + "|" + label + "|" + inVertex.getId() + "', '" + inVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
         return null;
     }
 

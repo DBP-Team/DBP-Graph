@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class PersistentEdge implements Edge {
-
+    // CREATE OR REPLACE TABLE edge (id varchar(50), outV varchar(50), inV varchar(50), label varchar(50), properties json);
+    // "INSERT INTO edge ('" + inV.getId() + "|" + label + "|" + outV.getId() + "', '" + outV.getId() + "', '" + inV.getId() + "', '" + label + "', null);";
     private String id;
     private Vertex outV;
     private Vertex inV;
