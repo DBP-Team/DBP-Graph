@@ -29,9 +29,8 @@ public class PersistentGraph implements Graph {
         try{
             stmt.executeUpdate("CREATE OR REPLACE DATABASE " + dbName);
             stmt.executeUpdate("USE "+ dbName);
-            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edge (id varchar(50), outV varchar(50), inV varchar(50), label varchar(50), properties json);");
-
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -45,7 +44,7 @@ public class PersistentGraph implements Graph {
         if (id.contains("|"))
             throw new IllegalArgumentException("id cannot contain '|'");
         try {
-            String query = "INSERT INTO verticies values('" + id + "', null);";
+            String query = "INSERT IGNORE INTO verticies values('" + id + "', null);";
             stmt.executeQuery(query); // id duplication check ?
             return new PersistentVertex(id);
         } catch (SQLException e) {
