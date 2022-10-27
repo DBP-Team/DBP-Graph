@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/DBP-Graph.iml" filepath="$PROJECT_DIR$/.idea/DBP-Graph.iml" />
-      <module fileurl="file://$PROJECT_DIR$/blueprints/blueprints.iml" filepath="$PROJECT_DIR$/blueprints/blueprints.iml" />
     </modules>
   </component>
 </project>
