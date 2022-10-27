@@ -63,7 +63,6 @@ public class PersistentVertex implements Vertex {
         } else {
             executeQuery = "UPDATE verticies SET properties=JSON_SET(properties, \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
         }
-        System.out.println(executeQuery);
         PersistentGraph.stmt.executeUpdate(executeQuery);
         this.properties.put(key, value);
     }
