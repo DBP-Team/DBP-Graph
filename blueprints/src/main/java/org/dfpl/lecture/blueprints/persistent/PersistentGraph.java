@@ -30,7 +30,7 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("CREATE OR REPLACE DATABASE " + dbName);
             stmt.executeUpdate("USE "+ dbName);
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE edge (id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edges (id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -146,13 +146,31 @@ public class PersistentGraph implements Graph {
     }
 
     @Override
-    public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) {
-        return null;
+    public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) throws SQLException {
+        String edgeID = makeID(outVertex, inVertex, label);
+        String query = "SELECT * FROM edges WHERE id=\'" + edgeID + "\'";
+        ResultSet rs = stmt.executeQuery(query);
+        if (rs == null)
+            return null;
+        return (new PersistentEdge(edgeID, outVertex, inVertex, label));
     }
 
     @Override
-    public Edge getEdge(String id) {
-        return null;
+    public Edge getEdge(String id) throws SQLException {
+        String query = "SELECT * FROM edges WHERE id=\'" + id + "\'";
+        ResultSet rs = stmt.executeQuery(query);
+        if (rs == null)
+            return null;
+
+        String[] arr = id.split("|");
+        String outVertexString = arr[0];
+        String inVertexString = arr[1];
+        String label = arr[2];
+
+        Vertex outVertex = new PersistentVertex(outVertexString);
+        Vertex inVertex = new PersistentVertex(inVertexString);
+
+        return (new PersistentEdge(id, outVertex, inVertex, label));
     }
 
     @Override
