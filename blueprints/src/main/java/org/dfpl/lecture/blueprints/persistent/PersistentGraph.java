@@ -37,7 +37,7 @@ public class PersistentGraph implements Graph {
         try{
             stmt.executeUpdate("CREATE OR REPLACE DATABASE db1007");
             stmt.executeUpdate("USE db1007");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -49,7 +49,7 @@ public class PersistentGraph implements Graph {
     public Vertex addVertex(String id) throws IllegalArgumentException, SQLException {
         Vertex v = null;
         try {
-            String query = "INSERT INTO verticies values('" + id + "', null);";
+            String query = "INSERT IGNORE INTO verticies values('" + id + "', null);";
             stmt.executeQuery(query); // id duplication check ?
             return new PersistentVertex(id);
         } catch (SQLException e) {
