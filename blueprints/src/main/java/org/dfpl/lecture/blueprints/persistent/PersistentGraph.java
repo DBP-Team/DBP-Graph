@@ -144,14 +144,27 @@ public class PersistentGraph implements Graph {
         String edgeID = makeID(outVertex, inVertex, label);
         String query = "SELECT * FROM edges WHERE id=\'" + edgeID + "\'";
         ResultSet rs = stmt.executeQuery(query);
-        if (rs != null)
-            return (new PersistentEdge(edgeID, outVertex, inVertex, label));
-        return null;
+        if (rs == null)
+            return null;
+        return (new PersistentEdge(edgeID, outVertex, inVertex, label));
     }
 
     @Override
-    public Edge getEdge(String id) {
-        return null;
+    public Edge getEdge(String id) throws SQLException {
+        String query = "SELECT * FROM edges WHERE id=\'" + id + "\'";
+        ResultSet rs = stmt.executeQuery(query);
+        if (rs == null)
+            return null;
+
+        String[] arr = id.split("|");
+        String outVertexString = arr[0];
+        String inVertexString = arr[1];
+        String label = arr[2];
+
+        Vertex outVertex = new PersistentVertex(outVertexString);
+        Vertex inVertex = new PersistentVertex(inVertexString);
+
+        return (new PersistentEdge(id, outVertex, inVertex, label));
     }
 
     @Override

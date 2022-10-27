@@ -97,7 +97,7 @@ public interface Graph {
 	 * @return the edge referenced by the provided identifier or null when no such
 	 *         edge exists
 	 */
-	public Edge getEdge(String id);
+	public Edge getEdge(String id) throws SQLException;
 
 	/**
 	 * Remove the provided edge from the graph.
