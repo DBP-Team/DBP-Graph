@@ -9,34 +9,34 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class PersistentGraph implements Graph {
-    static String id = "root";
-    static String pw = "1234";
+    static String id;
+    static String pw;
+    static String dbName;
     public static Connection connection;
-
-    static {
-        try {
-            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306", id, pw);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static Statement stmt;
 
-    static {
+    public PersistentGraph() {
         try {
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("ID:");
+            id = scanner.next();
+            System.out.print("Password:");
+            pw = scanner.next();
+            System.out.print("DBName:");
+            dbName = scanner.next();
+
+            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306", id, pw);
             stmt = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public PersistentGraph() {
+        // String id, String pw, String dbName
         try{
-            stmt.executeUpdate("CREATE OR REPLACE DATABASE db1007");
-            stmt.executeUpdate("USE db1007");
+            stmt.executeUpdate("CREATE OR REPLACE DATABASE " + dbName);
+            stmt.executeUpdate("USE "+ dbName);
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50), properties json)");
         } catch (SQLException e) {
             System.out.println(e);
@@ -48,6 +48,8 @@ public class PersistentGraph implements Graph {
     @Override
     public Vertex addVertex(String id) throws IllegalArgumentException, SQLException {
         Vertex v = null;
+        if (id.contains("|"))
+            throw new IllegalArgumentException("id cannot contain '|'");
         try {
             String query = "INSERT INTO verticies values('" + id + "', null);";
             stmt.executeQuery(query); // id duplication check ?
