@@ -24,3 +24,10 @@ hs_err_pid*
 
 # .idea folder ignore
 .idea/
+
+# Hyun jin Custom Test File
+blueprints/src/main/java/org/dfpl/lecture/blueprints/assignment/CustomTest_Jang.java
+
+# Seung hun Custom Test File
+blueprints/src/main/java/org/dfpl/lecture/blueprints/assignment/SeunghsoTest.java
+
