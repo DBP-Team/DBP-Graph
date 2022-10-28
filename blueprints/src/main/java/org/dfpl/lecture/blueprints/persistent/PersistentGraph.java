@@ -107,7 +107,7 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Collection<Vertex> getVertices(String key, Object value) throws SQLException { // 10_28/4:22/test 하지 못했음
-        String query = "SELECT * FROM vertices_properties WHERE key=\"" + key + "\" and " + "value=\"" + value + "\"";
+        String query = "SELECT * FROM vertex_properties WHERE key_=\"" + key + "\" and " + "value_=\"" + value + "\"";
         ResultSet rs = stmt.executeQuery(query);
         Collection<Vertex> vertexCollection = new ArrayList<Vertex>();
         while (rs.next()) {

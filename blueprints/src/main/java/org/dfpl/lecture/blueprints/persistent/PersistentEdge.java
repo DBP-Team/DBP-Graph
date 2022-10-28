@@ -67,7 +67,6 @@ public class PersistentEdge implements Edge {
         String insertQuery = "INSERT INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
 
         PersistentGraph.stmt.executeUpdate(updateQuery);
-        System.out.println(insertQuery);
         PersistentGraph.stmt.executeUpdate(insertQuery);
 
 
