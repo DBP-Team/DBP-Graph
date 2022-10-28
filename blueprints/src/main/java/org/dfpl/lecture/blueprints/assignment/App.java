@@ -15,7 +15,7 @@ public class App {
     public static void main(String[] args) throws SQLException {
 
 
-        PersistentGraph g = new PersistentGraph();
+        PersistentGraph g = new PersistentGraph("root", "1234", "db1007");
         Vertex v1 = g.addVertex("v1");
         Vertex v2 = g.addVertex("v2");
         Vertex vv2 = g.addVertex("v2"); // duplicate check

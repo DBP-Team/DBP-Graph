@@ -75,7 +75,7 @@ public interface Graph {
 	 * @throws IllegalArgumentException is thrown if a label contains '|'
 	 * @throws NullPointerException is thrown if vertex is null
 	 */
-	public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException;
+	public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException, SQLException;
 
 	/**
 	 * Return the edge with the unique combination of out-going vertex, in-going
@@ -112,7 +112,7 @@ public interface Graph {
 	 *
 	 * @return an iterable reference to all edges in the graph
 	 */
-	public Collection<Edge> getEdges();
+	public Collection<Edge> getEdges() throws SQLException;
 
 	/**
 	 * Return an iterable to all the edges in the graph that have a particular
