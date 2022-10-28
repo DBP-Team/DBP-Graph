@@ -47,7 +47,7 @@ public class PersistentVertex implements Vertex {
 
         String updateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
-        String insertQuery = "INSERT INTO "
+        String insertQuery = "INSERT INTO vertex_properties values('" + key + "', '" + value + "', " + this.id + ")";
         PersistentGraph.stmt.executeUpdate(updateQuery);
 
         this.properties.put(key, value);
