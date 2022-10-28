@@ -60,7 +60,7 @@ public interface Graph {
 	 * @param value the value of the vertex
 	 * @return an iterable of vertices with provided key and value
 	 */
-	public Collection<Vertex> getVertices(String key, Object value);
+	public Collection<Vertex> getVertices(String key, Object value) throws SQLException;
 
 	/**
 	 * Create a new edge if e(outVertexID|label|inVertexID) does not exist in the
@@ -125,7 +125,7 @@ public interface Graph {
 	 * @param value the value of the edge
 	 * @return an iterable of edges with provided key and value
 	 */
-	public Collection<Edge> getEdges(String key, Object value);
+	public Collection<Edge> getEdges(String key, Object value) throws SQLException;
 
 	/**
 	 * A shutdown function is required to properly close the graph. This is

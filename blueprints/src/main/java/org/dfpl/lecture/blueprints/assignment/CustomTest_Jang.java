@@ -19,6 +19,6 @@ public class CustomTest_Jang {
         Edge e2 = g.getEdge(v1, v2, "like");
         Edge e3 = g.getEdge(v1, v2, "like2");
         Edge e4 = g.getEdge("1|like|3");
-        System.out.println(g.getEdges());
+        System.out.println(g.getEdges("hi", "bye"));
     }
 }
