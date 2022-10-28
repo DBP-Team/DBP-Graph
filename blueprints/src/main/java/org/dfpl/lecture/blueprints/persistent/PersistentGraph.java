@@ -209,7 +209,7 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Collection<Edge> getEdges(String key, Object value) throws SQLException { // 10_28/4:22/test 하지 못했음
-        String query = "SELECT * FROM edges_properties WHERE key=\"" + key + "\" and value=\"" + value + "\"";
+        String query = "SELECT * FROM edge_properties WHERE key_=\"" + key + "\" and value_=\"" + value + "\"";
         ResultSet rs = stmt.executeQuery(query);
         Collection<Edge> edgeCollection = new ArrayList<Edge>();
         while (rs.next()) {
