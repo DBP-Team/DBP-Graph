@@ -26,7 +26,7 @@ hs_err_pid*
 .idea/
 
 # Hyun jin Custom Test File
-CustomTest_Jang.java
+blueprints/src/main/java/org/dfpl/lecture/blueprints/assignment/CustomTest_Jang.java
 
 # Seung hun Custom Test File
 SeunghsoTest.java
