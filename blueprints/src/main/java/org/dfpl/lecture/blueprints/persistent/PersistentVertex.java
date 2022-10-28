@@ -15,6 +15,11 @@ public class PersistentVertex implements Vertex {
     private String id;
     private HashMap<String, Object> properties;
 
+    @Override
+    public String toString() {
+        return "id: " + id + "keySet" + properties.keySet();
+    }
+
     public PersistentVertex(String id) {
         this.id = id;
         this.properties = new HashMap<>();
