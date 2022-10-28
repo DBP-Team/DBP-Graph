@@ -32,6 +32,8 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
             stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50))");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50))");
+            stmt.executeUpdate("ALTER TABLE edge_properties" +
+                    "ADD INDEX compound(key_, value_);");
 
         } catch (SQLException e) {
             System.out.println(e);
