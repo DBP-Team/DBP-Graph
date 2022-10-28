@@ -43,14 +43,13 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public void setProperty(String key, Object value) throws SQLException {
-        // properties table에 넣는 것
-
         String updateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
-        String insertQuery = "INSERT INTO vertex_properties values('" + key + "', '" + value + "', " + this.id + ")";
-        PersistentGraph.stmt.executeUpdate(updateQuery);
+        String insertQuery = "INSERT INTO vertex_properties VALUES('" + key + "', '" + value + "', " + this.id + ")";
 
-        this.properties.put(key, value);
+        PersistentGraph.stmt.executeUpdate(updateQuery);
+        PersistentGraph.stmt.executeUpdate(insertQuery);
+        properties.put(key, value);
     }
 
     @Override

@@ -29,9 +29,9 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("CREATE OR REPLACE DATABASE " + dbName);
             stmt.executeUpdate("USE " + dbName);
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE edges (id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
             stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50))");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50))");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50))");
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -155,7 +155,7 @@ public class PersistentGraph implements Graph {
     @Override
     public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) throws SQLException {
         String edgeID = makeID(outVertex.getId(), inVertex.getId(), label);
-        String query = "SELECT * FROM edges WHERE id=\'" + edgeID + "\'";
+        String query = "SELECT * FROM edges WHERE edge_id=\'" + edgeID + "\'";
         ResultSet rs = stmt.executeQuery(query);
         if (rs.next())
             return (new PersistentEdge(edgeID, outVertex, inVertex, label));
@@ -166,7 +166,7 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Edge getEdge(String id) throws SQLException {
-        String query = "SELECT * FROM edges WHERE id=\'" + id + "\'";
+        String query = "SELECT * FROM edges WHERE edge_id=\'" + id + "\'";
         ResultSet rs = stmt.executeQuery(query);
         if (rs.next()) {
             String[] arr = id.split("\\|");
