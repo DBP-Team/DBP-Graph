@@ -1,11 +1,16 @@
 package org.dfpl.lecture.blueprints.persistent;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
@@ -71,7 +76,54 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Collection<Vertex> getVertices(Direction direction, String... labels) throws IllegalArgumentException {
-        return null;
+        String selectQuery = "SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE ";
+        if (direction == Direction.OUT) {
+            selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
+        } else { // Direction.IN
+            selectQuery += "edges.inV = '" + id + "'";
+        }
+        if (labels.length != 0) {
+            selectQuery += " AND (";
+            for (int i = 0; i < labels.length; i++) {
+                selectQuery += " label = '" + labels[i] + "'";
+                if (i < labels.length - 1)
+                    selectQuery += " OR";
+            }
+            selectQuery += " )";
+        }
+        //System.out.println(selectQuery);
+        Collection<Vertex> verticies = new ArrayList<Vertex>();
+        try {
+            ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
+            while (rs.next()) {
+                String vertexId = rs.getString(1);
+                //System.out.println("vertex_id: "+vertexId);
+                HashMap<String, Object> prop = new ObjectMapper().readValue(rs.getString(2), HashMap.class);
+                Vertex v = new PersistentVertex(vertexId, prop);
+                //System.out.println(v.getPropertyKeys());
+                verticies.add(new PersistentVertex(vertexId, prop));
+            }
+        } catch (SQLException exception) {
+            System.out.println(exception);
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } catch (JsonParseException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return verticies;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Vertex){
+            Vertex vObj = (PersistentVertex) obj;
+            if(this.id.equals(vObj.getId())) // proeprties의 비교는 보류
+                return true;
+        }
+        return false;
     }
 
     @Override
