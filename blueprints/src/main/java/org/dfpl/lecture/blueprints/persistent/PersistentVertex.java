@@ -80,7 +80,7 @@ public class PersistentVertex implements Vertex {
         if (direction == Direction.OUT) {
             selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
         } else { // Direction.IN
-            selectQuery += "edges.inV = '" + id + "'";
+            selectQuery += "edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
         }
         if (labels.length != 0) {
             selectQuery += " AND (";
@@ -97,10 +97,8 @@ public class PersistentVertex implements Vertex {
             ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
             while (rs.next()) {
                 String vertexId = rs.getString(1);
-                //System.out.println("vertex_id: "+vertexId);
                 HashMap<String, Object> prop = new ObjectMapper().readValue(rs.getString(2), HashMap.class);
                 Vertex v = new PersistentVertex(vertexId, prop);
-                //System.out.println(v.getPropertyKeys());
                 verticies.add(new PersistentVertex(vertexId, prop));
             }
         } catch (SQLException exception) {
