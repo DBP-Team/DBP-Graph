@@ -1,5 +1,6 @@
 package org.dfpl.lecture.blueprints.assignment;
 
+import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
 import org.dfpl.lecture.blueprints.persistent.PersistentEdge;
@@ -79,7 +80,7 @@ public class App {
         verticies.add(a);
         verticies.add(b);
         verticies.add(c);
-        System.out.println(verticies.contains(new PersistentVertex("a")));
+        System.out.println(a.getVertices(Direction.BOTH).contains(b));
 
         g.shutdown();
     }

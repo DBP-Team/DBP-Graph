@@ -79,8 +79,12 @@ public class PersistentVertex implements Vertex {
         String selectQuery = "SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE ";
         if (direction == Direction.OUT) {
             selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
-        } else { // Direction.IN
+        } else if(direction == Direction.IN) {
             selectQuery += "edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
+        }
+        else{ // dierection == Direction.BOTH
+            selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
+            selectQuery += " UNION SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '"+ id + "' AND edges.outV = verticies.vertex_id";
         }
         if (labels.length != 0) {
             selectQuery += " AND (";
