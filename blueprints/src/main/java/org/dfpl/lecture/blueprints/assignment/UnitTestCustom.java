@@ -98,16 +98,16 @@ public class UnitTestCustom {
         System.out.println("[44] " + a.getVertices(Direction.IN).contains(c));
         System.out.println("[45] " + a.getVertices(Direction.IN).contains(e));
 
-        Vertex s = g.addVertex("s");
-        Edge ss = g.addEdge(s, s, "l");
-        System.out.println("[46] " + s.getEdges(Direction.OUT).contains(ss));
-        System.out.println("[47] " + s.getEdges(Direction.IN).contains(ss));
-        System.out.println("[48] " + s.getEdges(Direction.IN).contains(ab));
-        try {
-            System.out.println("[49] " + s.getEdges(Direction.BOTH).size());
-        } catch (IllegalArgumentException err) {
-            System.out.println("[49] " + err.getMessage());
-        }
+//        Vertex s = g.addVertex("s");
+//        Edge ss = g.addEdge(s, s, "l");
+//        System.out.println("[46] " + s.getEdges(Direction.OUT).contains(ss));
+//        System.out.println("[47] " + s.getEdges(Direction.IN).contains(ss));
+//        System.out.println("[48] " + s.getEdges(Direction.IN).contains(ab));
+//        try {
+//            System.out.println("[49] " + s.getEdges(Direction.BOTH).size());
+//        } catch (IllegalArgumentException err) {
+//            System.out.println("[49] " + err.getMessage());
+//        }
 
         try {
             System.out.println("[50] " + ab.getVertex(Direction.BOTH));

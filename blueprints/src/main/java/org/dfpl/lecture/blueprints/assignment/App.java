@@ -80,7 +80,7 @@ public class App {
         verticies.add(a);
         verticies.add(b);
         verticies.add(c);
-        System.out.println(a.getVertices(Direction.BOTH).contains(b));
+        System.out.println(a.getVertices(Direction.BOTH).contains(b)); //true
 
         g.shutdown();
     }
