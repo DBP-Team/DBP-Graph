@@ -71,6 +71,7 @@ public class App {
         Vertex d = g.addVertex("d");
         Vertex e = g.addVertex("e");
 
+
         Edge ab = g.addEdge(a, b, "l");
         Edge ac = g.addEdge(a, c, "l");
         Edge da = g.addEdge(d, a, "l");
@@ -81,6 +82,12 @@ public class App {
         verticies.add(b);
         verticies.add(c);
         System.out.println(a.getVertices(Direction.BOTH).contains(b)); //true
+
+        b.setProperty("k", true);
+        System.out.println(a.getVertices(Direction.OUT, "k", true).contains(b)); // true
+        // value가 String이면 label로 인식
+
+        //System.out.println(a.getVertices(Direction.OUT))
 
         g.shutdown();
     }

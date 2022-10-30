@@ -50,7 +50,9 @@ public class PersistentVertex implements Vertex {
     public void setProperty(String key, Object value) throws SQLException {
         String updateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
-        String insertQuery = "INSERT INTO vertex_properties VALUES('" + key + "', '" + value + "', " + this.id + ")";
+        String insertQuery = "INSERT INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+
+        //System.out.println(insertQuery);
 
         PersistentGraph.stmt.executeUpdate(updateQuery);
         PersistentGraph.stmt.executeUpdate(insertQuery);
@@ -79,12 +81,11 @@ public class PersistentVertex implements Vertex {
         String selectQuery = "SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE ";
         if (direction == Direction.OUT) {
             selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
-        } else if(direction == Direction.IN) {
+        } else if (direction == Direction.IN) {
             selectQuery += "edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
-        }
-        else{ // dierection == Direction.BOTH
+        } else { // dierection == Direction.BOTH
             selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
-            selectQuery += " UNION SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '"+ id + "' AND edges.outV = verticies.vertex_id";
+            selectQuery += " UNION SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
         }
         if (labels.length != 0) {
             selectQuery += " AND (";
@@ -120,9 +121,9 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof Vertex){
+        if (obj instanceof Vertex) {
             Vertex vObj = (PersistentVertex) obj;
-            if(this.id.equals(vObj.getId())) // proeprties의 비교는 보류
+            if (this.id.equals(vObj.getId())) // proeprties의 비교는 보류
                 return true;
         }
         return false;
@@ -130,7 +131,46 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Collection<Vertex> getVertices(Direction direction, String key, Object value, String... labels) throws IllegalArgumentException {
-        return null;
+        String selectQuery = "SELECT a.vertex_id, a.properties FROM (SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE ";
+        if (direction == Direction.OUT) {
+            selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
+        } else if (direction == Direction.IN) {
+            selectQuery += "edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
+        } else { // dierection == Direction.BOTH
+            selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
+            selectQuery += " UNION SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
+        }
+        if (labels.length != 0) {
+            selectQuery += " AND (";
+            for (int i = 0; i < labels.length; i++) {
+                selectQuery += " label = '" + labels[i] + "'";
+                if (i < labels.length - 1)
+                    selectQuery += " OR";
+            }
+            selectQuery += " )";
+        }
+        selectQuery += ") AS a JOIN (SELECT vertex_id FROM vertex_properties WHERE key_ = '" + key + "' AND value_ = '" + value.toString() + "') AS b ON a.vertex_id = b.vertex_id";
+        System.out.println(selectQuery);
+        Collection<Vertex> verticies = new ArrayList<Vertex>();
+        try {
+            ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
+            while (rs.next()) {
+                String vertexId = rs.getString(1);
+                HashMap<String, Object> prop = new ObjectMapper().readValue(rs.getString(2), HashMap.class);
+                Vertex v = new PersistentVertex(vertexId, prop);
+                verticies.add(new PersistentVertex(vertexId, prop));
+            }
+        } catch (SQLException exception) {
+            System.out.println(exception);
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } catch (JsonParseException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return verticies;
     }
 
     @Override
