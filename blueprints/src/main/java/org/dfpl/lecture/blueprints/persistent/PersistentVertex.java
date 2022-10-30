@@ -97,7 +97,7 @@ public class PersistentVertex implements Vertex {
             query += ");";
         }
 
-//        System.out.println(query);
+//        System.out.println(query);hello
         ResultSet rs = PersistentGraph.stmt.executeQuery(query);
 
         while(rs.next()){
