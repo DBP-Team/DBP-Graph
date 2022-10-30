@@ -22,6 +22,13 @@ public class PersistentEdge implements Edge {
         this.label = label;
         this.properties = new HashMap<>();
     }
+    public PersistentEdge(String id, Vertex outV, Vertex inV, String label, HashMap<String, Object> properties) {
+        this.id = id;
+        this.outV = outV;
+        this.inV = inV;
+        this.label = label;
+        this.properties = properties;
+    }
 
     @Override
     public String toString() {
@@ -43,6 +50,16 @@ public class PersistentEdge implements Edge {
     @Override
     public void remove() {
 
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Edge){
+            Edge eObj = (PersistentEdge) obj;
+            if(this.id.equals(eObj.getId()))
+                return true;
+        }
+        return false;
     }
 
     @Override

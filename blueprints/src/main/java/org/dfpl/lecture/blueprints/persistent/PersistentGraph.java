@@ -6,13 +6,9 @@ import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
 
 import java.sql.*;
-<<<<<<< HEAD
-import java.util.*;
-=======
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
->>>>>>> 58b2513b603a077a4b295ba69c8875ebc2b6a97d
 
 public class PersistentGraph implements Graph {
     static String id;

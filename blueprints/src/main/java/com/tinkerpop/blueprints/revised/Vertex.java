@@ -1,5 +1,7 @@
 package com.tinkerpop.blueprints.revised;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collection;
 
 /**
@@ -24,7 +26,7 @@ public interface Vertex extends Element {
 	 * @return an iterable of incident edges
 	 * @throws IllegalArgumentException is thrown if a direction of both is provided
 	 */
-	public Collection<Edge> getEdges(Direction direction, String... labels) throws IllegalArgumentException;
+	public Collection<Edge> getEdges(Direction direction, String... labels) throws IllegalArgumentException, SQLException, IOException;
 
 	/**
 	 * Return the vertices adjacent to the vertex according to the provided
