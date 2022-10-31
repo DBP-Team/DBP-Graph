@@ -84,8 +84,7 @@ public class PersistentVertex implements Vertex {
         } else if (direction == Direction.IN) {
             selectQuery += "edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
         } else { // dierection == Direction.BOTH
-            selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
-            selectQuery += " UNION SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
+            selectQuery += "(edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id) OR (edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id)";
         }
         if (labels.length != 0) {
             selectQuery += " AND (";
@@ -103,15 +102,10 @@ public class PersistentVertex implements Vertex {
             while (rs.next()) {
                 String vertexId = rs.getString(1);
                 HashMap<String, Object> prop = new ObjectMapper().readValue(rs.getString(2), HashMap.class);
-                Vertex v = new PersistentVertex(vertexId, prop);
                 verticies.add(new PersistentVertex(vertexId, prop));
             }
         } catch (SQLException exception) {
             System.out.println(exception);
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonParseException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -137,8 +131,7 @@ public class PersistentVertex implements Vertex {
         } else if (direction == Direction.IN) {
             selectQuery += "edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
         } else { // dierection == Direction.BOTH
-            selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
-            selectQuery += " UNION SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
+            selectQuery += "((edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id) OR (edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id))";
         }
         if (labels.length != 0) {
             selectQuery += " AND (";
@@ -150,22 +143,17 @@ public class PersistentVertex implements Vertex {
             selectQuery += " )";
         }
         selectQuery += ") AS a JOIN (SELECT vertex_id FROM vertex_properties WHERE key_ = '" + key + "' AND value_ = '" + value.toString() + "') AS b ON a.vertex_id = b.vertex_id";
-        System.out.println(selectQuery);
+        //System.out.println(selectQuery);
         Collection<Vertex> verticies = new ArrayList<Vertex>();
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
             while (rs.next()) {
                 String vertexId = rs.getString(1);
                 HashMap<String, Object> prop = new ObjectMapper().readValue(rs.getString(2), HashMap.class);
-                Vertex v = new PersistentVertex(vertexId, prop);
                 verticies.add(new PersistentVertex(vertexId, prop));
             }
         } catch (SQLException exception) {
             System.out.println(exception);
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonParseException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -72,7 +72,7 @@ public class App {
         Vertex e = g.addVertex("e");
 
 
-        Edge ab = g.addEdge(a, b, "l");
+        Edge ab = g.addEdge(a, b, "k");
         Edge ac = g.addEdge(a, c, "l");
         Edge da = g.addEdge(d, a, "l");
         Edge ea = g.addEdge(e, a, "l");
@@ -81,13 +81,20 @@ public class App {
         verticies.add(a);
         verticies.add(b);
         verticies.add(c);
-        System.out.println(a.getVertices(Direction.BOTH).contains(b)); //true
+        System.out.println(a.getVertices(Direction.OUT, "l").contains(b));
+        System.out.println(a.getVertices(Direction.BOTH, "k").contains(b));
+        System.out.println(a.getVertices(Direction.IN).contains(b));
+        System.out.println(a.getVertices(Direction.IN).contains(d));
 
-        b.setProperty("k", true);
-        System.out.println(a.getVertices(Direction.OUT, "k", true).contains(b)); // true
+        b.setProperty("k1", true);
+        d.setProperty("k1", false);
+        System.out.println();
+        System.out.println(a.getVertices(Direction.OUT, "k1", true, "k").contains(b)); // true
         // value가 String이면 label로 인식
+        System.out.println(a.getVertices(Direction.IN, "k1", true).contains(d)); // false
+        System.out.println(a.getVertices(Direction.BOTH, "k1", false, "l").contains(d)); // true
 
-        //System.out.println(a.getVertices(Direction.OUT))
+
 
         g.shutdown();
     }

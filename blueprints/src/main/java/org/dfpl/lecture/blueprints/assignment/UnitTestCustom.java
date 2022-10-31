@@ -79,15 +79,15 @@ public class UnitTestCustom {
         Edge da = g.addEdge(d, a, "l");
         Edge ea = g.addEdge(e, a, "l");
 
-//        System.out.println("[28] " + a.getEdges(Direction.OUT).contains(ab));
-//        System.out.println("[29] " + a.getEdges(Direction.OUT).contains(ac));
-//        System.out.println("[30] " + a.getEdges(Direction.OUT).contains(da));
-//        System.out.println("[31] " + a.getEdges(Direction.OUT, "l").contains(ac));
-//        System.out.println("[32] " + a.getEdges(Direction.OUT, "k").contains(ac));
-//        System.out.println("[33] " + a.getEdges(Direction.OUT, "l", "k").contains(ac));
-//        System.out.println("[34] " + a.getEdges(Direction.IN).contains(ab));
-//        System.out.println("[35] " + a.getEdges(Direction.IN).contains(ac));
-//        System.out.println("[36] " + a.getEdges(Direction.IN).contains(ea));
+        System.out.println("[28] " + a.getEdges(Direction.OUT).contains(ab));
+        System.out.println("[29] " + a.getEdges(Direction.OUT).contains(ac));
+        System.out.println("[30] " + a.getEdges(Direction.OUT).contains(da));
+        System.out.println("[31] " + a.getEdges(Direction.OUT, "l").contains(ac));
+        System.out.println("[32] " + a.getEdges(Direction.OUT, "k").contains(ac));
+        System.out.println("[33] " + a.getEdges(Direction.OUT, "l", "k").contains(ac));
+        System.out.println("[34] " + a.getEdges(Direction.IN).contains(ab));
+        System.out.println("[35] " + a.getEdges(Direction.IN).contains(ac));
+        System.out.println("[36] " + a.getEdges(Direction.IN).contains(ea));
         System.out.println("[37] " + a.getVertices(Direction.OUT).contains(b));
         System.out.println("[38] " + a.getVertices(Direction.OUT).contains(c));
         System.out.println("[39] " + a.getVertices(Direction.OUT).contains(d));
@@ -98,16 +98,16 @@ public class UnitTestCustom {
         System.out.println("[44] " + a.getVertices(Direction.IN).contains(c));
         System.out.println("[45] " + a.getVertices(Direction.IN).contains(e));
 
-//        Vertex s = g.addVertex("s");
-//        Edge ss = g.addEdge(s, s, "l");
-//        System.out.println("[46] " + s.getEdges(Direction.OUT).contains(ss));
-//        System.out.println("[47] " + s.getEdges(Direction.IN).contains(ss));
-//        System.out.println("[48] " + s.getEdges(Direction.IN).contains(ab));
-//        try {
-//            System.out.println("[49] " + s.getEdges(Direction.BOTH).size());
-//        } catch (IllegalArgumentException err) {
-//            System.out.println("[49] " + err.getMessage());
-//        }
+        Vertex s = g.addVertex("s");
+        Edge ss = g.addEdge(s, s, "l");
+        System.out.println("[46] " + s.getEdges(Direction.OUT).contains(ss));
+        System.out.println("[47] " + s.getEdges(Direction.IN).contains(ss));
+        System.out.println("[48] " + s.getEdges(Direction.IN).contains(ab));
+        try {
+            System.out.println("[49] " + s.getEdges(Direction.BOTH).size());
+        } catch (IllegalArgumentException err) {
+            System.out.println("[49] " + err.getMessage());
+        }
 
         try {
             System.out.println("[50] " + ab.getVertex(Direction.BOTH));
