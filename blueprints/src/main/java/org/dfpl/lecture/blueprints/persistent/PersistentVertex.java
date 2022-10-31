@@ -100,22 +100,49 @@ public class PersistentVertex implements Vertex {
 //        System.out.println(query);hello
         ResultSet rs = PersistentGraph.stmt.executeQuery(query);
 
+        Edge e = null;
+
         while(rs.next()){
             String edge_id = rs.getString(1);
-            String outVertexName = rs.getString(2);
+            //String outVertexName = rs.getString(2);
             String inVertexName = rs.getString(3);
             String label = rs.getString(4);
+            String prop = rs.getString(5);
 
-            Vertex outV = new PersistentVertex(outVertexName);
-            Vertex inV = new PersistentVertex(inVertexName);
+            Vertex outV = this;
+            Vertex inV = getVertex(inVertexName);
 
-            Edge e = new PersistentEdge(edge_id, outV, inV, label);
+            if(prop != null){
+                HashMap<String, Object> map = new ObjectMapper().readValue(rs.getString(5), HashMap.class);
+                e = new PersistentEdge(edge_id, outV, inV, label, map);
+            }
+            else
+                e = new PersistentEdge(edge_id, outV, inV, label);
+
             edgeCollection.add(e);
 
         }
 
         return edgeCollection;
+    }
 
+    private Vertex getVertex(String VertexName) throws SQLException, IOException {
+        HashMap<String, Object> prop = null;
+        ResultSet rs = PersistentGraph.stmt.executeQuery("SELECT properties FROM verticies WHERE vertex_id =\'" + VertexName + "\';");
+
+        try{
+            if(rs.next())
+                prop = new ObjectMapper().readValue(rs.getString(1), HashMap.class);
+            else  // 행 자체가 없을 때 ..?
+                return null;
+        } catch (NullPointerException e){  // properties만 없을 때
+            Vertex v = new PersistentVertex(VertexName);
+            return v;
+        }
+
+        Vertex v = new PersistentVertex(VertexName, prop);
+
+        return v;
     }
 
     @Override
