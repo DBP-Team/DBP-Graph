@@ -19,7 +19,7 @@ public class PersistentGraph implements Graph {
 
     public PersistentGraph(String id, String pw, String dbName) {
         try {
-            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3307", id, pw);
+            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306", id, pw);
             stmt = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
