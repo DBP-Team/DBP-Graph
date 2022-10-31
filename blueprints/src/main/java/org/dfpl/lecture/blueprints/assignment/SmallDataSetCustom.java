@@ -17,7 +17,7 @@ public class SmallDataSetCustom {
 
         // 참고: 평가를 위한 데이터셋은 보다 작은 데이터셋을 활용 (예: CollegeMsg.txt, http://snap.stanford.edu/data/index.html)
         // 참고: 데이터셋 변경 가능
-        String fileName = "/Users/haegu/java_backup/AssignmentEx/blueprints/src/main/java/org/dfpl/lecture/blueprints/assignment/CollegeMsg.txt";
+        String fileName = "./blueprints/data/CollegeMsg.txt";
         String delimiter = "\\s";
         String dbID = "root";
         String dbPW = "1234";
