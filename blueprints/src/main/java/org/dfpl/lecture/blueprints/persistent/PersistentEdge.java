@@ -56,8 +56,17 @@ public class PersistentEdge implements Edge {
     public boolean equals(Object obj) {
         if(obj instanceof Edge){
             Edge eObj = (PersistentEdge) obj;
+
             if(this.id.equals(eObj.getId()))
                 return true;
+//            if(this.id.equals(eObj.getId())
+//                    && this.outV.equals(eObj.getVertex(Direction.OUT))
+//                    && this.inV.equals(eObj.getVertex(Direction.IN))) {
+
+//                System.out.println("\n" + "id : " + eObj.getId());
+//                System.out.println("outV : " + (eObj.getVertex(Direction.OUT)).getId());
+//                System.out.println("inV : " + (eObj.getVertex(Direction.IN)).getId());
+
         }
         return false;
     }
