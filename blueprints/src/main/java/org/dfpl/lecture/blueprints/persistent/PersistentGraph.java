@@ -32,7 +32,18 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
             stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50))");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50))");
+            stmt.executeUpdate("CREATE INDEX edge_index ON edge_properties (key_, value_)");
+            stmt.executeUpdate("CREATE INDEX vertex_index ON vertex_properties (key_, value_)");
 
+            /*
+            index를 중지시키곳 싶을 경우
+            stmt.executeUpdate("ALTER TABLE edge_properties DISABLE edge_index");
+            stmt.executeUpdate("ALTER TABLE vertex_properties DISABLE vertex_index");
+
+            현재 index 를 확인하고 싶을 경우
+            show index from edge_properties;
+            show index from vertex_properties;
+             */
         } catch (SQLException e) {
             System.out.println(e);
         }
