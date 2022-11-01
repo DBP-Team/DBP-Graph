@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
+import org.dfpl.lecture.blueprints.assignment.UnitTestCustom;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -72,8 +73,80 @@ public class PersistentVertex implements Vertex {
     }
 
     @Override
-    public Collection<Edge> getEdges(Direction direction, String... labels) throws IllegalArgumentException {
-        return null;
+    public Collection<Edge> getEdges(Direction direction, String... labels) throws IllegalArgumentException, SQLException, IOException {
+
+        String condition;
+        String query = null;
+        Collection<Edge> edgeCollection = new ArrayList<Edge>();
+
+        if (direction == Direction.BOTH)
+            throw new IllegalArgumentException("Direction.BOTH is not allowed");
+
+        if (direction == Direction.OUT)
+            condition = "outV = ";
+        else // Direction.IN
+            condition = "inV = ";
+
+        query = "SELECT * FROM edges WHERE " + condition + "\'" + this.id + "\'";
+
+        if (labels.length > 0) {
+            query += " AND (";
+            for (int i = 0; i < labels.length; i++) {
+                query += "label = '" + labels[i] + "'";
+
+                if (i != labels.length - 1) {
+                    query += " OR ";
+                }
+            }
+            query += ");";
+        }
+
+//        System.out.println(query);hello
+        ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+
+        Edge e = null;
+
+        while(rs.next()){
+            String edge_id = rs.getString(1);
+            //String outVertexName = rs.getString(2);
+            String inVertexName = rs.getString(3);
+            String label = rs.getString(4);
+            String prop = rs.getString(5);
+
+            Vertex outV = this;
+            Vertex inV = getVertex(inVertexName);
+
+            if(prop != null){
+                HashMap<String, Object> map = new ObjectMapper().readValue(rs.getString(5), HashMap.class);
+                e = new PersistentEdge(edge_id, outV, inV, label, map);
+            }
+            else
+                e = new PersistentEdge(edge_id, outV, inV, label);
+
+            edgeCollection.add(e);
+
+        }
+
+        return edgeCollection;
+    }
+
+    private Vertex getVertex(String VertexName) throws SQLException, IOException {
+        HashMap<String, Object> prop = null;
+        ResultSet rs = PersistentGraph.stmt.executeQuery("SELECT properties FROM verticies WHERE vertex_id =\'" + VertexName + "\';");
+
+        try{
+            if(rs.next())
+                prop = new ObjectMapper().readValue(rs.getString(1), HashMap.class);
+            else  // 행 자체가 없을 때 ..?
+                return null;
+        } catch (NullPointerException e){  // properties만 없을 때
+            Vertex v = new PersistentVertex(VertexName);
+            return v;
+        }
+
+        Vertex v = new PersistentVertex(VertexName, prop);
+
+        return v;
     }
 
     @Override

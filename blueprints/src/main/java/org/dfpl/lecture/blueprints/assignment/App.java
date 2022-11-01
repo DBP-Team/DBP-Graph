@@ -14,7 +14,7 @@ import java.util.Collection;
 public class App {
 
     static String id = "root";
-    static String pw = "1234";
+    static String pw = "0210";
 
     public static void main(String[] args) throws SQLException {
 
