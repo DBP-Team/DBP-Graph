@@ -60,7 +60,7 @@ public interface Graph {
 	 * @param value the value of the vertex
 	 * @return an iterable of vertices with provided key and value
 	 */
-	public Collection<Vertex> getVertices(String key, Object value);
+	public Collection<Vertex> getVertices(String key, Object value) throws SQLException;
 
 	/**
 	 * Create a new edge if e(outVertexID|label|inVertexID) does not exist in the
@@ -75,7 +75,7 @@ public interface Graph {
 	 * @throws IllegalArgumentException is thrown if a label contains '|'
 	 * @throws NullPointerException is thrown if vertex is null
 	 */
-	public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException;
+	public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException, SQLException;
 
 	/**
 	 * Return the edge with the unique combination of out-going vertex, in-going
@@ -87,7 +87,7 @@ public interface Graph {
 	 * @param label     edge label
 	 * @return
 	 */
-	public Edge getEdge(Vertex outVertex, Vertex inVertex, String label);
+	public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) throws SQLException;
 
 	/**
 	 * Return the edge referenced by the provided object identifier. If no edge is
@@ -97,7 +97,7 @@ public interface Graph {
 	 * @return the edge referenced by the provided identifier or null when no such
 	 *         edge exists
 	 */
-	public Edge getEdge(String id);
+	public Edge getEdge(String id) throws SQLException;
 
 	/**
 	 * Remove the provided edge from the graph.
@@ -112,7 +112,7 @@ public interface Graph {
 	 *
 	 * @return an iterable reference to all edges in the graph
 	 */
-	public Collection<Edge> getEdges();
+	public Collection<Edge> getEdges() throws SQLException;
 
 	/**
 	 * Return an iterable to all the edges in the graph that have a particular
@@ -125,7 +125,7 @@ public interface Graph {
 	 * @param value the value of the edge
 	 * @return an iterable of edges with provided key and value
 	 */
-	public Collection<Edge> getEdges(String key, Object value);
+	public Collection<Edge> getEdges(String key, Object value) throws SQLException;
 
 	/**
 	 * A shutdown function is required to properly close the graph. This is

@@ -6,13 +6,14 @@ import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
 import org.dfpl.lecture.blueprints.persistent.PersistentGraph;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class UnitTestCustom {
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, IOException {
 
-        Graph g = new PersistentGraph("root", "1234", "db1007");
+        Graph g = new PersistentGraph("root", "0210", "db1007");
         Vertex v1 = g.addVertex("1");
         System.out.println("[1] " + v1.getId());
         v1 = g.addVertex("1");
@@ -88,15 +89,15 @@ public class UnitTestCustom {
         System.out.println("[34] " + a.getEdges(Direction.IN).contains(ab));
         System.out.println("[35] " + a.getEdges(Direction.IN).contains(ac));
         System.out.println("[36] " + a.getEdges(Direction.IN).contains(ea));
-        System.out.println("[37] " + a.getVertices(Direction.OUT).contains(b));
-        System.out.println("[38] " + a.getVertices(Direction.OUT).contains(c));
-        System.out.println("[39] " + a.getVertices(Direction.OUT).contains(d));
-        System.out.println("[40] " + a.getVertices(Direction.OUT, "l").contains(b));
-        System.out.println("[41] " + a.getVertices(Direction.OUT, "k").contains(b));
-        System.out.println("[42] " + a.getVertices(Direction.OUT, "l", "k").contains(b));
-        System.out.println("[43] " + a.getVertices(Direction.IN).contains(b));
-        System.out.println("[44] " + a.getVertices(Direction.IN).contains(c));
-        System.out.println("[45] " + a.getVertices(Direction.IN).contains(e));
+//        System.out.println("[37] " + a.getVertices(Direction.OUT).contains(b));
+//        System.out.println("[38] " + a.getVertices(Direction.OUT).contains(c));
+//        System.out.println("[39] " + a.getVertices(Direction.OUT).contains(d));
+//        System.out.println("[40] " + a.getVertices(Direction.OUT, "l").contains(b));
+//        System.out.println("[41] " + a.getVertices(Direction.OUT, "k").contains(b));
+//        System.out.println("[42] " + a.getVertices(Direction.OUT, "l", "k").contains(b));
+//        System.out.println("[43] " + a.getVertices(Direction.IN).contains(b));
+//        System.out.println("[44] " + a.getVertices(Direction.IN).contains(c));
+//        System.out.println("[45] " + a.getVertices(Direction.IN).contains(e));
 
         Vertex s = g.addVertex("s");
         Edge ss = g.addEdge(s, s, "l");

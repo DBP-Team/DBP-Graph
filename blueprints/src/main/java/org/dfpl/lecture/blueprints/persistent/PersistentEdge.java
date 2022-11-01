@@ -4,12 +4,11 @@ import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Set;
 
 public class PersistentEdge implements Edge {
-    // CREATE OR REPLACE TABLE edge (id varchar(50), outV varchar(50), inV varchar(50), label varchar(50), properties json);
-    // "INSERT INTO edge ('" + inV.getId() + "|" + label + "|" + outV.getId() + "', '" + outV.getId() + "', '" + inV.getId() + "', '" + label + "', null);";
     private String id;
     private Vertex outV;
     private Vertex inV;
@@ -21,13 +20,29 @@ public class PersistentEdge implements Edge {
         this.outV = outV;
         this.inV = inV;
         this.label = label;
+        this.properties = new HashMap<>();
+    }
+    public PersistentEdge(String id, Vertex outV, Vertex inV, String label, HashMap<String, Object> properties) {
+        this.id = id;
+        this.outV = outV;
+        this.inV = inV;
+        this.label = label;
+        this.properties = properties;
     }
 
     @Override
-    public Vertex getVertex(Direction direction) throws IllegalArgumentException {
-        if (direction.equals(Direction.OUT)) // bug check
+    public String toString() {
+        return id + "/" + outV.getId() + "/" + inV.getId() + "/" + label;
+    }
+
+    @Override
+    public Vertex getVertex(Direction direction) {
+        if (direction.equals(Direction.OUT))
             return outV;
-        return inV;
+        else if (direction.equals(Direction.IN))
+            return inV;
+        else throw new IllegalArgumentException("Direction.BOTH is not allowed");
+
     }
 
     @Override
@@ -38,6 +53,27 @@ public class PersistentEdge implements Edge {
     @Override
     public void remove() {
 
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Edge){
+            Edge eObj = (PersistentEdge) obj;
+
+            if(this.id.equals(eObj.getId()))
+                return true;
+//            if(this.id.equals(eObj.getId())
+//                    && this.outV.equals(eObj.getVertex(Direction.OUT))
+//                    && this.inV.equals(eObj.getVertex(Direction.IN))) {
+//                return true;
+//            }
+
+//                System.out.println("\n" + "id : " + eObj.getId());
+//                System.out.println("outV : " + (eObj.getVertex(Direction.OUT)).getId());
+//                System.out.println("inV : " + (eObj.getVertex(Direction.IN)).getId());
+
+        }
+        return false;
     }
 
     @Override
@@ -56,7 +92,15 @@ public class PersistentEdge implements Edge {
     }
 
     @Override
-    public void setProperty(String key, Object value) {
+    public void setProperty(String key, Object value) throws SQLException {
+        String updateQuery = "UPDATE edges SET properties=JSON_SET(properties," +
+                " \'$." + key + "\', \'" + value + "\') WHERE edge_id=\'" + this.id + "\';";
+        String insertQuery = "INSERT INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+
+        PersistentGraph.stmt.executeUpdate(updateQuery);
+        PersistentGraph.stmt.executeUpdate(insertQuery);
+
+
         properties.put(key, value);
     }
 

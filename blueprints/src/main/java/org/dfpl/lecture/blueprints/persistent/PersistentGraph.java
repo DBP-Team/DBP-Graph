@@ -9,7 +9,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Scanner;
 
 public class PersistentGraph implements Graph {
     static String id;
@@ -26,11 +25,13 @@ public class PersistentGraph implements Graph {
             throw new RuntimeException(e);
         }
         // String id, String pw, String dbName
-        try{
+        try {
             stmt.executeUpdate("CREATE OR REPLACE DATABASE " + dbName);
-            stmt.executeUpdate("USE "+ dbName);
+            stmt.executeUpdate("USE " + dbName);
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE edge (id varchar(50), outV varchar(50), inV varchar(50), label varchar(50), properties json);");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50))");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50))");
         } catch (SQLException e) {
             System.out.println(e);
         }
@@ -44,7 +45,7 @@ public class PersistentGraph implements Graph {
         if (id.contains("|"))
             throw new IllegalArgumentException("id cannot contain '|'");
         try {
-            String query = "INSERT IGNORE INTO verticies values('" + id + "', null);";
+            String query = "INSERT IGNORE INTO verticies values('" + id + "', '{}');";
             stmt.executeQuery(query); // id duplication check ?
             return new PersistentVertex(id);
         } catch (SQLException e) {
@@ -105,35 +106,81 @@ public class PersistentGraph implements Graph {
     }
 
     @Override
-    public Collection<Vertex> getVertices(String key, Object value) {
-        Collection<Vertex> arrayList = new ArrayList<Vertex>();
-        try {
-            String query = "SELECT vertex_id FROM verticies WHERE JSON_VALUE(properties, \'$." + key + "\')= \'" + value + "\';";
-            System.out.println(query);
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                arrayList.add(this.getVertex(rs.getString(1)));
-            }
-        } catch (Exception e){
-            System.out.println("Exception Occur: " + e);
+    public Collection<Vertex> getVertices(String key, Object value) throws SQLException { // 10_28/4:22/test 하지 못했음
+        String query = "SELECT * FROM vertex_properties WHERE key_=\"" + key + "\" and " + "value_=\"" + value + "\"";
+        ResultSet rs = stmt.executeQuery(query);
+        Collection<Vertex> vertexCollection = new ArrayList<Vertex>();
+        while (rs.next()) {
+            String edgeID = rs.getString(3);
+            Vertex v = getVertex(edgeID);
+            vertexCollection.add(v);
         }
-        return arrayList;
+        return vertexCollection;
+    }
+
+    public void validEdgeArgumentCheck(Vertex outVertex, Vertex inVertex, String label) {
+        if (label.contains("|"))
+            throw new IllegalArgumentException("label cannot contain '|'");
+        if (outVertex == null)
+            throw new NullPointerException("outVertex cannot be null");
+        if (inVertex == null)
+            throw new NullPointerException("inVertex cannot be null");
+    }
+
+    public String makeID(String outVertexId, String inVertexId, String label)
+            throws NullPointerException, IllegalArgumentException {
+        return outVertexId + "|" + label + "|" + inVertexId;
     }
 
     @Override
-    public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException {
-        String query = "INSERT INTO edge ('" + inVertex.getId() + "|" + label + "|" + inVertex.getId() + "', '" + inVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
-        return null;
+    public Edge addEdge(Vertex outVertex, Vertex inVertex, String label)
+            throws IllegalArgumentException, NullPointerException, SQLException {
+        validEdgeArgumentCheck(outVertex, inVertex, label);
+        String id = makeID(outVertex.getId(), inVertex.getId(), label);
+        Edge edge = getEdge(id);
+        if (edge != null)
+            return edge;
+        try {
+            edge = new PersistentEdge(id, outVertex, inVertex, label);
+            String query = "INSERT IGNORE INTO edges VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
+            stmt.executeUpdate(query);
+
+        } catch (SQLException e) {
+            System.out.println(e);
+            return null;
+        }
+        return edge;
     }
 
     @Override
-    public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) {
-        return null;
+    public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) throws SQLException {
+        String edgeID = makeID(outVertex.getId(), inVertex.getId(), label);
+        String query = "SELECT * FROM edges WHERE edge_id=\'" + edgeID + "\'";
+        ResultSet rs = stmt.executeQuery(query);
+        if (rs.next())
+            return (new PersistentEdge(edgeID, outVertex, inVertex, label));
+        else
+            return null;
+
     }
 
     @Override
-    public Edge getEdge(String id) {
-        return null;
+    public Edge getEdge(String id) throws SQLException {
+        String query = "SELECT * FROM edges WHERE edge_id=\'" + id + "\'";
+        ResultSet rs = stmt.executeQuery(query);
+        if (rs.next()) {
+            String[] arr = id.split("\\|");
+            String outVertexString = arr[0];
+            String inVertexString = arr[2];
+            String label = arr[1];
+
+            Vertex outVertex = getVertex(outVertexString);
+            Vertex inVertex = getVertex(inVertexString);
+
+            return (new PersistentEdge(id, outVertex, inVertex, label));
+        } else
+            return null;
+
     }
 
     @Override
@@ -142,13 +189,35 @@ public class PersistentGraph implements Graph {
     }
 
     @Override
-    public Collection<Edge> getEdges() {
-        return null;
+    public Collection<Edge> getEdges() throws SQLException {
+        String query = "SELECT * FROM edges";
+        ResultSet rs = stmt.executeQuery(query);
+        Collection<Edge> edgeCollection = new ArrayList<Edge>();
+        while (rs.next()) {
+            String edgeID = rs.getString(1);
+            String outVertexId = rs.getString(2);
+            String inVertexId = rs.getString(3);
+            String label = rs.getString(4);
+
+            Vertex outVertex = getVertex(outVertexId);
+            Vertex inVertex = getVertex(inVertexId);
+
+            edgeCollection.add(new PersistentEdge(edgeID, outVertex, inVertex, label));
+        }
+        return edgeCollection;
     }
 
     @Override
-    public Collection<Edge> getEdges(String key, Object value) {
-        return null;
+    public Collection<Edge> getEdges(String key, Object value) throws SQLException { // 10_28/4:22/test 하지 못했음
+        String query = "SELECT * FROM edge_properties WHERE key_=\"" + key + "\" and value_=\"" + value + "\"";
+        ResultSet rs = stmt.executeQuery(query);
+        Collection<Edge> edgeCollection = new ArrayList<Edge>();
+        while (rs.next()) {
+            String edgeID = rs.getString(3);
+            Edge e = getEdge(edgeID);
+            edgeCollection.add(e);
+        }
+        return edgeCollection;
     }
 
     @Override
