@@ -36,10 +36,13 @@ public class PersistentEdge implements Edge {
     }
 
     @Override
-    public Vertex getVertex(Direction direction) throws IllegalArgumentException {
-        if (direction.equals(Direction.OUT)) // bug check
+    public Vertex getVertex(Direction direction) {
+        if (direction.equals(Direction.OUT))
             return outV;
-        return inV;
+        else if (direction.equals(Direction.IN))
+            return inV;
+        else throw new IllegalArgumentException("Direction.BOTH is not allowed");
+
     }
 
     @Override
