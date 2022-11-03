@@ -22,6 +22,13 @@ public class PersistentEdge implements Edge {
         this.label = label;
         this.properties = new HashMap<>();
     }
+    public PersistentEdge(String id, Vertex outV, Vertex inV, String label, HashMap<String, Object> properties) {
+        this.id = id;
+        this.outV = outV;
+        this.inV = inV;
+        this.label = label;
+        this.properties = properties;
+    }
 
     @Override
     public String toString() {
@@ -29,10 +36,13 @@ public class PersistentEdge implements Edge {
     }
 
     @Override
-    public Vertex getVertex(Direction direction) throws IllegalArgumentException {
-        if (direction.equals(Direction.OUT)) // bug check
+    public Vertex getVertex(Direction direction) {
+        if (direction.equals(Direction.OUT))
             return outV;
-        return inV;
+        else if (direction.equals(Direction.IN))
+            return inV;
+        else throw new IllegalArgumentException("Direction.BOTH is not allowed");
+
     }
 
     @Override
@@ -43,6 +53,27 @@ public class PersistentEdge implements Edge {
     @Override
     public void remove() {
 
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Edge){
+            Edge eObj = (PersistentEdge) obj;
+
+            if(this.id.equals(eObj.getId()))
+                return true;
+//            if(this.id.equals(eObj.getId())
+//                    && this.outV.equals(eObj.getVertex(Direction.OUT))
+//                    && this.inV.equals(eObj.getVertex(Direction.IN))) {
+//                return true;
+//            }
+
+//                System.out.println("\n" + "id : " + eObj.getId());
+//                System.out.println("outV : " + (eObj.getVertex(Direction.OUT)).getId());
+//                System.out.println("inV : " + (eObj.getVertex(Direction.IN)).getId());
+
+        }
+        return false;
     }
 
     @Override
