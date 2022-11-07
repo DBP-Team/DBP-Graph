@@ -204,6 +204,36 @@ public class SmallDataSetCustom {
         }
         System.out.println("[22] " + min12C);
         System.out.println("[P6] " + min12);
+
+        long min13 = Long.MAX_VALUE;
+        int min13C = 0;
+        for (int i = 0; i < 5; i++) {
+            long pre = System.nanoTime();
+            min13C = g.getVertex(maxOutDegreeID).getTwoHopVertices(Direction.OUT).size();
+            long elapsedTime = System.nanoTime() - pre;
+            if (elapsedTime < min13) {
+                System.out.println("\t" + min13 + " -> " + elapsedTime);
+                min13 = elapsedTime;
+            }
+        }
+        //  [23] should be same with [21]
+        System.out.println("[23] " + min13C);
+        System.out.println("[P7] " + min13);
+
+        long min14 = Long.MAX_VALUE;
+        int min14C = 0;
+        for (int i = 0; i < 5; i++) {
+            long pre = System.nanoTime();
+            min14C = g.getVertex(maxInDegreeID).getTwoHopVertices(Direction.IN).size();
+            long elapsedTime = System.nanoTime() - pre;
+            if (elapsedTime < min14) {
+                System.out.println("\t" + min14 + " -> " + elapsedTime);
+                min14 = elapsedTime;
+            }
+        }
+        // [24] should be same with [22]
+        System.out.println("[24] " + min14C);
+        System.out.println("[P8] " + min14);
     }
 
     @SuppressWarnings("unused")

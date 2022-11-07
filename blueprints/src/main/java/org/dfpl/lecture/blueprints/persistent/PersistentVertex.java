@@ -202,6 +202,11 @@ public class PersistentVertex implements Vertex {
     }
 
     @Override
+    public Collection<Vertex> getTwoHopVertices(Direction direction, String... labels) throws IllegalArgumentException {
+        return null;
+    }
+
+    @Override
     public Collection<Vertex> getVertices(Direction direction, String key, Object value, String... labels) throws IllegalArgumentException {
         String selectQuery = "SELECT a.vertex_id, a.properties FROM (SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE ";
         if (direction == Direction.OUT) {
