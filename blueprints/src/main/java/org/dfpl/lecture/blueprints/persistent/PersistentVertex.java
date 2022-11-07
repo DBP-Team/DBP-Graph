@@ -1,12 +1,9 @@
 package org.dfpl.lecture.blueprints.persistent;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.dfpl.lecture.blueprints.assignment.UnitTestCustom;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -67,7 +64,6 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Object removeProperty(String key) {
-//        UPDATE verticies SET properties=JSON_REMOVE(properties, '$.k3') WHERE vertex_id='v3';
         String query = "UPDATE verticies SET properties=JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
         try {
             PersistentGraph.stmt.executeUpdate(query);
@@ -106,7 +102,6 @@ public class PersistentVertex implements Vertex {
             query += ");";
         }
 
-//        System.out.println(query);hello
         ResultSet rs = PersistentGraph.stmt.executeQuery(query);
 
         Edge e = null;

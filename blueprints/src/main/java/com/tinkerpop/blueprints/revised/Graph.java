@@ -1,6 +1,5 @@
 package com.tinkerpop.blueprints.revised;
 
-import java.sql.SQLException;
 import java.util.Collection;
 
 /**
@@ -21,7 +20,7 @@ public interface Graph {
 	 * @return the newly created vertex or the existing vertex, v(id)
 	 * @throws IllegalArgumentException is thrown if id contains '|'
 	 */
-	public Vertex addVertex(String id) throws IllegalArgumentException, SQLException;
+	public Vertex addVertex(String id) throws IllegalArgumentException;
 
 	/**
 	 * Return the vertex referenced by the provided object identifier. If no vertex
@@ -31,7 +30,7 @@ public interface Graph {
 	 * @return the vertex referenced by the provided identifier or null when no such
 	 *         vertex exists
 	 */
-	public Vertex getVertex(String id) throws SQLException;
+	public Vertex getVertex(String id);
 
 	/**
 	 * Remove the provided vertex from the graph. Upon removing the vertex, all the
@@ -39,7 +38,7 @@ public interface Graph {
 	 *
 	 * @param vertex the vertex to remove from the graph
 	 */
-	public void removeVertex(Vertex vertex) throws SQLException;
+	public void removeVertex(Vertex vertex);
 
 	/**
 	 * Return an iterable to all the vertices in the graph. If this is not possible
@@ -47,7 +46,7 @@ public interface Graph {
 	 *
 	 * @return an iterable reference to all vertices in the graph
 	 */
-	public Collection<Vertex> getVertices() throws SQLException;
+	public Collection<Vertex> getVertices();
 
 	/**
 	 * Return an iterable to all the vertices in the graph that have a particular
@@ -60,7 +59,7 @@ public interface Graph {
 	 * @param value the value of the vertex
 	 * @return an iterable of vertices with provided key and value
 	 */
-	public Collection<Vertex> getVertices(String key, Object value) throws SQLException;
+	public Collection<Vertex> getVertices(String key, Object value);
 
 	/**
 	 * Create a new edge if e(outVertexID|label|inVertexID) does not exist in the
@@ -75,19 +74,19 @@ public interface Graph {
 	 * @throws IllegalArgumentException is thrown if a label contains '|'
 	 * @throws NullPointerException is thrown if vertex is null
 	 */
-	public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException, SQLException;
+	public Edge addEdge(Vertex outVertex, Vertex inVertex, String label) throws IllegalArgumentException, NullPointerException;
 
 	/**
 	 * Return the edge with the unique combination of out-going vertex, in-going
 	 * vertex, and label. If no edge is referenced by that identifier, then return
 	 * null.
-	 * 
+	 *
 	 * @param outVertex out-going vertex
 	 * @param inVertex  in-going vertex
 	 * @param label     edge label
 	 * @return
 	 */
-	public Edge getEdge(Vertex outVertex, Vertex inVertex, String label) throws SQLException;
+	public Edge getEdge(Vertex outVertex, Vertex inVertex, String label);
 
 	/**
 	 * Return the edge referenced by the provided object identifier. If no edge is
@@ -97,7 +96,7 @@ public interface Graph {
 	 * @return the edge referenced by the provided identifier or null when no such
 	 *         edge exists
 	 */
-	public Edge getEdge(String id) throws SQLException;
+	public Edge getEdge(String id);
 
 	/**
 	 * Remove the provided edge from the graph.
@@ -112,7 +111,7 @@ public interface Graph {
 	 *
 	 * @return an iterable reference to all edges in the graph
 	 */
-	public Collection<Edge> getEdges() throws SQLException;
+	public Collection<Edge> getEdges();
 
 	/**
 	 * Return an iterable to all the edges in the graph that have a particular
@@ -125,12 +124,12 @@ public interface Graph {
 	 * @param value the value of the edge
 	 * @return an iterable of edges with provided key and value
 	 */
-	public Collection<Edge> getEdges(String key, Object value) throws SQLException;
+	public Collection<Edge> getEdges(String key, Object value);
 
 	/**
 	 * A shutdown function is required to properly close the graph. This is
 	 * important for implementations that utilize disk-based serializations.
 	 */
-	public void shutdown() throws SQLException;
+	public void shutdown();
 
 }
