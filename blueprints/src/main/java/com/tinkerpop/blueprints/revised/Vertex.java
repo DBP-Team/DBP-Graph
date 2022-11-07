@@ -1,5 +1,6 @@
 package com.tinkerpop.blueprints.revised;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 /**
