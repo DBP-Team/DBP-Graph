@@ -8,10 +8,7 @@ import com.tinkerpop.blueprints.revised.Vertex;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 public class PersistentVertex implements Vertex {
 
@@ -206,7 +203,28 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Collection<Vertex> getTwoHopVertices(Direction direction, String... labels) throws IllegalArgumentException {
-        return null;
+
+        Collection<Vertex> vertexCollection;
+        Collection<Vertex> vertexCollection1 = new ArrayList<Vertex>();
+        Collection<Vertex> vertexCollection2 = new ArrayList<Vertex>();
+
+        vertexCollection = this.getVertices(direction, labels);
+        Iterator<Vertex> it = vertexCollection.iterator();
+
+        while(it.hasNext()){
+            vertexCollection1.addAll(it.next().getVertices(direction, labels));
+        }
+
+//        vertexCollection = this.getVertices(direction, labels);
+        Iterator<Vertex> it1 = vertexCollection1.iterator();
+
+        while(it1.hasNext()){
+            vertexCollection2.addAll(it1.next().getVertices(direction, labels));
+        }
+
+        return vertexCollection2;
+//        return this.getVertices(direction).stream().flatMap(v -> v.getVertices(direction).stream())
+//                .flatMap(v -> v.getVertices(direction).stream()).toList();
     }
 
     @Override
