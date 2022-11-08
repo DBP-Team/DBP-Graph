@@ -1,12 +1,9 @@
 package org.dfpl.lecture.blueprints.persistent;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.dfpl.lecture.blueprints.assignment.UnitTestCustom;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -20,6 +17,11 @@ public class PersistentVertex implements Vertex {
 
     private String id;
     private HashMap<String, Object> properties;
+
+    @Override
+    public String toString() {
+        return "id: " + id + "keySet" + properties.keySet();
+    }
 
     public PersistentVertex(String id) {
         this.id = id;
@@ -48,32 +50,34 @@ public class PersistentVertex implements Vertex {
     }
 
     @Override
-    public void setProperty(String key, Object value) throws SQLException {
+    public void setProperty(String key, Object value) {
         String updateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
         String insertQuery = "INSERT INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
 
-        //System.out.println(insertQuery);
+        try {
+            PersistentGraph.stmt.executeUpdate(updateQuery);
+            PersistentGraph.stmt.executeUpdate(insertQuery);
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        }
 
-        PersistentGraph.stmt.executeUpdate(updateQuery);
-        PersistentGraph.stmt.executeUpdate(insertQuery);
         properties.put(key, value);
     }
 
     @Override
     public Object removeProperty(String key) {
-//        UPDATE verticies SET properties=JSON_REMOVE(properties, '$.k3') WHERE vertex_id='v3';
         String query = "UPDATE verticies SET properties=JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
         try {
             PersistentGraph.stmt.executeUpdate(query);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
         }
         return properties.remove(key);
     }
 
     @Override
-    public Collection<Edge> getEdges(Direction direction, String... labels) throws IllegalArgumentException, SQLException, IOException {
+    public Collection<Edge> getEdges(Direction direction, String... labels) throws IllegalArgumentException {
 
         String condition;
         String query = null;
@@ -101,31 +105,35 @@ public class PersistentVertex implements Vertex {
             query += ");";
         }
 
-//        System.out.println(query);hello
-        ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+        try {
+            ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+            Edge e = null;
 
-        Edge e = null;
+            while(rs.next()){
+                String edge_id = rs.getString(1);
+                //String outVertexName = rs.getString(2);
+                String inVertexName = rs.getString(3);
+                String label = rs.getString(4);
+                String prop = rs.getString(5);
 
-        while(rs.next()){
-            String edge_id = rs.getString(1);
-            //String outVertexName = rs.getString(2);
-            String inVertexName = rs.getString(3);
-            String label = rs.getString(4);
-            String prop = rs.getString(5);
+                Vertex outV = this;
+                Vertex inV = getVertex(inVertexName);
 
-            Vertex outV = this;
-            Vertex inV = getVertex(inVertexName);
+                if(prop != null){
+                    HashMap<String, Object> map = new ObjectMapper().readValue(rs.getString(5), HashMap.class);
+                    e = new PersistentEdge(edge_id, outV, inV, label, map);
+                }
+                else
+                    e = new PersistentEdge(edge_id, outV, inV, label);
 
-            if(prop != null){
-                HashMap<String, Object> map = new ObjectMapper().readValue(rs.getString(5), HashMap.class);
-                e = new PersistentEdge(edge_id, outV, inV, label, map);
+                edgeCollection.add(e);
             }
-            else
-                e = new PersistentEdge(edge_id, outV, inV, label);
-
-            edgeCollection.add(e);
-
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        } catch (IOException e) {
+            System.out.println("Exception Occur: " + e);
         }
+
 
         return edgeCollection;
     }
@@ -197,6 +205,11 @@ public class PersistentVertex implements Vertex {
     }
 
     @Override
+    public Collection<Vertex> getTwoHopVertices(Direction direction, String... labels) throws IllegalArgumentException {
+        return null;
+    }
+
+    @Override
     public Collection<Vertex> getVertices(Direction direction, String key, Object value, String... labels) throws IllegalArgumentException {
         String selectQuery = "SELECT a.vertex_id, a.properties FROM (SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE ";
         if (direction == Direction.OUT) {
@@ -236,6 +249,11 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public void remove() {
-
+        String query = "DELETE FROM verticies WHERE vertex_id='" + this.id + "'";
+        try {
+            PersistentGraph.stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        }
     }
 }

@@ -92,14 +92,17 @@ public class PersistentEdge implements Edge {
     }
 
     @Override
-    public void setProperty(String key, Object value) throws SQLException {
+    public void setProperty(String key, Object value) {
         String updateQuery = "UPDATE edges SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE edge_id=\'" + this.id + "\';";
         String insertQuery = "INSERT INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
 
-        PersistentGraph.stmt.executeUpdate(updateQuery);
-        PersistentGraph.stmt.executeUpdate(insertQuery);
-
+        try {
+            PersistentGraph.stmt.executeUpdate(updateQuery);
+            PersistentGraph.stmt.executeUpdate(insertQuery);
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        }
 
         properties.put(key, value);
     }
