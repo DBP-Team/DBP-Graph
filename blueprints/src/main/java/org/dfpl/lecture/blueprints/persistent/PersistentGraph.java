@@ -1,10 +1,13 @@
 package org.dfpl.lecture.blueprints.persistent;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -131,12 +134,12 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Collection<Vertex> getVertices(String key, Object value) { // 10_28/4:22/test 하지 못했음
-        String query = "SELECT * FROM vertex_properties WHERE key_=\"" + key + "\" and " + "value_=\"" + value + "\"";
+        String query = "SELECT distinct vertex_id FROM vertex_properties WHERE key_=\"" + key + "\" and " + "value_=\"" + value + "\"";
         Collection<Vertex> vertexCollection = new ArrayList<Vertex>();
         try {
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
-                String edgeID = rs.getString(3);
+                String edgeID = rs.getString(1);
                 Vertex v = getVertex(edgeID);
                 vertexCollection.add(v);
             }
@@ -170,7 +173,7 @@ public class PersistentGraph implements Graph {
             return edge;
         try {
             edge = new PersistentEdge(id, outVertex, inVertex, label);
-            String query = "INSERT IGNORE INTO edges VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', null);";
+            String query = "INSERT IGNORE INTO edges VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', '{}');";
             stmt.executeUpdate(query);
 
         } catch (SQLException e) {
@@ -198,22 +201,32 @@ public class PersistentGraph implements Graph {
     @Override
     public Edge getEdge(String id) {
         String query = "SELECT * FROM edges WHERE edge_id=\'" + id + "\'";
+        HashMap propertiesMap = null;
         try {
             ResultSet rs = stmt.executeQuery(query);
             if (rs.next()) {
                 String[] arr = id.split("\\|");
-                String outVertexString = arr[0];
-                String inVertexString = arr[2];
-                String label = arr[1];
-
+                String outVertexString = rs.getString(2);
+                String inVertexString = rs.getString(3);
+                String label = rs.getString(4);
+                String properties = rs.getString(5);
+                if (properties != null) {
+                    propertiesMap = new ObjectMapper().readValue(properties, HashMap.class);
+                }
                 Vertex outVertex = getVertex(outVertexString);
                 Vertex inVertex = getVertex(inVertexString);
 
-                return (new PersistentEdge(id, outVertex, inVertex, label));
+                return (new PersistentEdge(id, outVertex, inVertex, label, propertiesMap));
             } else
                 return null;
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } catch (JsonParseException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
