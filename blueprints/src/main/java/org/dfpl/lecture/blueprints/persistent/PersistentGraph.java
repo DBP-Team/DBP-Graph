@@ -250,13 +250,13 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Collection<Edge> getEdges(String key, Object value) { // 10_28/4:22/test 하지 못했음
-        String query = "SELECT * FROM edge_properties WHERE key_=\"" + key + "\" and value_=\"" + value + "\"";
+        String query = "SELECT distinct edge_id FROM edge_properties WHERE key_=\"" + key + "\" and value_=\"" + value + "\"";
         Collection<Edge> edgeCollection = new ArrayList<Edge>();
 
         try {
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
-                String edgeID = rs.getString(3);
+                String edgeID = rs.getString(1);
                 Edge e = getEdge(edgeID);
                 edgeCollection.add(e);
             }
