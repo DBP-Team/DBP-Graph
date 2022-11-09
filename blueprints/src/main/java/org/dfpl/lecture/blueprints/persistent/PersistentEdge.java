@@ -37,7 +37,7 @@ public class PersistentEdge implements Edge {
 
     @Override
     public Vertex getVertex(Direction direction) {
-git a        if (direction.equals(Direction.OUT))
+        if (direction.equals(Direction.OUT))
             return outV;
         else if (direction.equals(Direction.IN))
             return inV;
