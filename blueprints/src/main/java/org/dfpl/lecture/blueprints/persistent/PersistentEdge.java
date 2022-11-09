@@ -123,6 +123,18 @@ public class PersistentEdge implements Edge {
 
     @Override
     public Object removeProperty(String key) {
+        String updateVerticiesQuery = "UPDATE edges SET properties=" +
+                "JSON_REMOVE(properties, \'$." + key + "\') WHERE edge_id=\'" + this.id + "\';";
+        String deletePropertiesQuery = "DELETE FROM edge_properties WHERE edge_id = '"
+                + this.id + "' AND key_ = '" + key + "'";
+
+        try {
+            PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
+            PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        }
+
         return properties.remove(key);
     }
 }

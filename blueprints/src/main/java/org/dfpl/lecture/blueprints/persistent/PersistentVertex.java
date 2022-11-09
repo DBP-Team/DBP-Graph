@@ -73,9 +73,13 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Object removeProperty(String key) {
-        String query = "UPDATE verticies SET properties=JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
+        String updateVerticiesQuery = "UPDATE verticies SET properties=" +
+                "JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
+        String deletePropertiesQuery = "DELETE FROM vertex_properties WHERE vertex_id = '"
+                + this.id + "' AND key_ = '" + key + "'";
         try {
-            PersistentGraph.stmt.executeUpdate(query);
+            PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
+            PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
         }
