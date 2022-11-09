@@ -34,9 +34,9 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
             stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50), " +
-                    "FOREIGN KEY (vertex_id) REFERENCES verticies (vertex_id) ON DELETE CASCADE);");
+                    "FOREIGN KEY (vertex_id) REFERENCES verticies (vertex_id) ON DELETE CASCADE, PRIMARY KEY (vertex_id, key_));");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50), " +
-                    "FOREIGN KEY (edge_id) REFERENCES edges (edge_id) ON DELETE CASCADE);");
+                    "FOREIGN KEY (edge_id) REFERENCES edges (edge_id) ON DELETE CASCADE, PRIMARY KEY (edge_id, key_));");
             stmt.executeUpdate("CREATE INDEX edge_index ON edge_properties (key_, value_)");
             stmt.executeUpdate("CREATE INDEX vertex_index ON vertex_properties (key_, value_)");
             // CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50)), FOREIGN KEY vertex_id REFERENCES verticies vertex_id
@@ -121,11 +121,20 @@ public class PersistentGraph implements Graph {
 
         Collection<Vertex> arrayList = new ArrayList<Vertex>();
         try {
-            ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM verticies;");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM verticies;");
+            HashMap propertiesMap = null;
             while (rs.next()) {
-                arrayList.add(this.getVertex(rs.getString(1)));
+                String id = rs.getString(1);
+                String properties = rs.getString(2);
+                if (properties != null) {
+                    propertiesMap = new ObjectMapper().readValue(properties, HashMap.class);
+                }
+                arrayList.add(new PersistentVertex(id, propertiesMap));
+//                arrayList.add(this.getVertex(rs.getString(1)));
             }
         } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        } catch (IOException e) {
             System.out.println("Exception Occur: " + e);
         }
 
