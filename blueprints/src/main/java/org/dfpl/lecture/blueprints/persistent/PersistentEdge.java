@@ -52,7 +52,12 @@ public class PersistentEdge implements Edge {
 
     @Override
     public void remove() {
-
+        String query = "DELETE FROM edges WHERE edge_id='" + this.id + "'";
+        try {
+            PersistentGraph.stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        }
     }
 
     @Override

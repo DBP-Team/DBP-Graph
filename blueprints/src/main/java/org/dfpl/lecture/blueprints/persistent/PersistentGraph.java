@@ -242,7 +242,11 @@ public class PersistentGraph implements Graph {
 
     @Override
     public void removeEdge(Edge edge) {
-
+        try {
+            stmt.executeQuery("DELETE FROM edges WHERE edge_id=\'" + edge.getId() + "\';");
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        }
     }
 
     @Override
