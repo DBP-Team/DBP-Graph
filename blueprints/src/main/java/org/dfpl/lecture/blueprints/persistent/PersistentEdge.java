@@ -52,7 +52,12 @@ public class PersistentEdge implements Edge {
 
     @Override
     public void remove() {
-
+        String query = "DELETE FROM edges WHERE edge_id='" + this.id + "'";
+        try {
+            PersistentGraph.stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        }
     }
 
     @Override
@@ -93,15 +98,24 @@ public class PersistentEdge implements Edge {
 
     @Override
     public void setProperty(String key, Object value) {
-        String updateQuery = "UPDATE edges SET properties=JSON_SET(properties," +
-                " \'$." + key + "\', \'" + value + "\') WHERE edge_id=\'" + this.id + "\';";
-        String insertQuery = "INSERT INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+
+        String edgesUpdateQuery = "UPDATE edges SET properties=JSON_SET(properties," +
+                " \'$." + key + "\', \'" + value + "\') WHERE edge_id=\'" + this.id + "\'";
+        String propertiesInsertQuery = "INSERT IGNORE INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
 
         try {
-            PersistentGraph.stmt.executeUpdate(updateQuery);
-            PersistentGraph.stmt.executeUpdate(insertQuery);
+            PersistentGraph.stmt.executeUpdate(edgesUpdateQuery);
+            PersistentGraph.stmt.executeUpdate(propertiesInsertQuery);
+            // 1. insert 에서 exception 발생 시 update
+            // 2. select 로 이미 있는지 알아낸 다음 update
         } catch (SQLException e) {
-            System.out.println("Exception Occur: " + e);
+            String propertiesUpdateQuery = "UPDATE edge_properties SET value_='" + value + "' WHERE edge_id = '"
+                    + this.id + "' AND key_ ='" + key + "'";
+            try {
+                PersistentGraph.stmt.executeUpdate(propertiesUpdateQuery);
+            } catch (SQLException e2) {
+                System.out.println(e2);
+            }
         }
 
         properties.put(key, value);
@@ -109,6 +123,18 @@ public class PersistentEdge implements Edge {
 
     @Override
     public Object removeProperty(String key) {
+        String updateVerticiesQuery = "UPDATE edges SET properties=" +
+                "JSON_REMOVE(properties, \'$." + key + "\') WHERE edge_id=\'" + this.id + "\';";
+        String deletePropertiesQuery = "DELETE FROM edge_properties WHERE edge_id = '"
+                + this.id + "' AND key_ = '" + key + "'";
+
+        try {
+            PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
+            PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
+        } catch (SQLException e) {
+            System.out.println("Exception Occur: " + e);
+        }
+
         return properties.remove(key);
     }
 }
