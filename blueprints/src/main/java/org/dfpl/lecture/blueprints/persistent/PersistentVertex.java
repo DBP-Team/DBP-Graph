@@ -43,7 +43,6 @@ public class PersistentVertex implements Vertex {
         return properties.get(key);
     }
 
-
     @Override
     public Set<String> getPropertyKeys() {
         return properties.keySet();
@@ -51,25 +50,36 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public void setProperty(String key, Object value) {
-        String updateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
-                " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\';";
-        String insertQuery = "INSERT INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+        String verticiesUpdateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
+                " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\'";
+        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
 
         try {
-            PersistentGraph.stmt.executeUpdate(updateQuery);
-            PersistentGraph.stmt.executeUpdate(insertQuery);
+            PersistentGraph.stmt.executeUpdate(verticiesUpdateQuery);
+            PersistentGraph.stmt.executeUpdate(propertiesInsertQuery);
+            // 1. insert 에서 exception 발생 시 update
+            // 2. select 로 이미 있는지 알아낸 다음 update
         } catch (SQLException e) {
-            System.out.println("Exception Occur: " + e);
+            String propertiesUpdateQuery = "UPDATE vertex_properties SET value_='" + value + "' WHERE vertex_id = '"
+                    + this.id + "' AND key_ ='" + key + "'";
+            try {
+                PersistentGraph.stmt.executeUpdate(propertiesUpdateQuery);
+            } catch (SQLException e2) {
+                System.out.println(e2);
+            }
         }
-
         properties.put(key, value);
     }
 
     @Override
     public Object removeProperty(String key) {
-        String query = "UPDATE verticies SET properties=JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
+        String updateVerticiesQuery = "UPDATE verticies SET properties=" +
+                "JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
+        String deletePropertiesQuery = "DELETE FROM vertex_properties WHERE vertex_id = '"
+                + this.id + "' AND key_ = '" + key + "'";
         try {
-            PersistentGraph.stmt.executeUpdate(query);
+            PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
+            PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
         }
