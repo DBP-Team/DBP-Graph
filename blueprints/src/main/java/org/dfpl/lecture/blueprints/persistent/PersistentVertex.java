@@ -281,7 +281,6 @@ public class PersistentVertex implements Vertex {
         }
 
         return vCol1;
-
     }
 
     @Override
