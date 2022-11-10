@@ -212,25 +212,68 @@ public class PersistentVertex implements Vertex {
     @Override
     public Collection<Vertex> getTwoHopVertices(Direction direction, String... labels) throws IllegalArgumentException {
 
-        Collection<Vertex> vertexCollection;
-        Collection<Vertex> vertexCollection1 = new ArrayList<Vertex>();
-        Collection<Vertex> vertexCollection2 = new ArrayList<Vertex>();
+        Collection<Vertex> vCol1 = new ArrayList<Vertex>();
 
-        vertexCollection = this.getVertices(direction, labels);
-        Iterator<Vertex> it = vertexCollection.iterator();
+        if(direction == Direction.OUT) {
+            String query = "SELECT edges.inV AS result FROM" +
+                    " (SELECT edges.inV FROM (SELECT DISTINCT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.outV = '" + this.id + "' AND edges.inV = verticies.vertex_id) AS r1 JOIN edges" +
+                    " WHERE r1.vertex_id = edges.outV) AS r2 JOIN edges WHERE r2.inV = edges.outV;";
+            try {
+                ResultSet rs = PersistentGraph.stmt.executeQuery(query);
 
-        while(it.hasNext()){
-            vertexCollection1.addAll(it.next().getVertices(direction, labels));
+                while (rs.next()) {
+                    String vId = rs.getString(1);
+                    vCol1.add(getVertex(vId));
+                }
+            }catch (SQLException e){
+                System.out.println("Exception Occur: " + e);
+            } catch (IOException e) {
+                System.out.println("Exception Occur: " + e);
+            }
         }
 
+        // SELECT edges.outV AS result FROM (SELECT edges.outV FROM (SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = "a" AND edges.outV = verticies.vertex_id) AS r1 JOIN edges WHERE r1.vertex_id = edges.inV) as r2 JOIN edges WHERE r2.outV = edges.inV;
+        else{// IN
+            String query = "SELECT edges.outV AS result FROM" +
+                    " (SELECT edges.outV FROM (SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '"+ this.id+"' AND edges.outV = verticies.vertex_id) AS r1 JOIN edges" +
+                    " WHERE r1.vertex_id = edges.inV) as r2 JOIN edges WHERE r2.outV = edges.inV;";
+            try {
+                ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+
+                while (rs.next()) {
+                    String vId = rs.getString(1);
+                    vCol1.add(getVertex(vId));
+                }
+            }catch (SQLException e){
+                System.out.println("Exception Occur: " + e);
+            } catch (IOException e) {
+                System.out.println("Exception Occur: " + e);
+            }
+        }
+
+        return vCol1;
+
+       //  SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = "a" AND edges.outV = verticies.vertex_id;
+
+//        Collection<Vertex> vertexCollection;
+//        Collection<Vertex> vertexCollection1 = new ArrayList<Vertex>();
+//        Collection<Vertex> vertexCollection2 = new ArrayList<Vertex>();
+//
 //        vertexCollection = this.getVertices(direction, labels);
-        Iterator<Vertex> it1 = vertexCollection1.iterator();
-
-        while(it1.hasNext()){
-            vertexCollection2.addAll(it1.next().getVertices(direction, labels));
-        }
-
-        return vertexCollection2;
+//        Iterator<Vertex> it = vertexCollection.iterator();
+//
+//        while(it.hasNext()){
+//            vertexCollection1.addAll(it.next().getVertices(direction, labels));
+//        }
+//
+////        vertexCollection = this.getVertices(direction, labels);
+//        Iterator<Vertex> it1 = vertexCollection1.iterator();
+//
+//        while(it1.hasNext()){
+//            vertexCollection2.addAll(it1.next().getVertices(direction, labels));
+//        }
+//
+//        return vertexCollection2;
 //        return this.getVertices(direction).stream().flatMap(v -> v.getVertices(direction).stream())
 //                .flatMap(v -> v.getVertices(direction).stream()).toList();
     }
