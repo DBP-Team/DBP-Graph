@@ -211,9 +211,15 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Collection<Vertex> getTwoHopVertices(Direction direction, String... labels) throws IllegalArgumentException {
-
         Collection<Vertex> vCol1 = new ArrayList<Vertex>();
-
+        // example
+        // SELECT edges.inV AS result
+        // FROM (SELECT edges.inV
+        //       FROM (SELECT DISTINCT verticies.vertex_id, verticies.properties
+        //             FROM verticies JOIN edges
+        //             WHERE edges.outV = '9' AND edges.inV = verticies.vertex_id) AS r1
+        //       JOIN edges WHERE r1.vertex_id = edges.outV) AS r2
+        // JOIN edges WHERE r2.inV = edges.outV;
         if(direction == Direction.OUT) {
             String query = "SELECT edges.inV AS result FROM" +
                     " (SELECT edges.inV FROM (SELECT DISTINCT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.outV = '" + this.id + "' AND edges.inV = verticies.vertex_id) AS r1 JOIN edges" +
@@ -276,38 +282,15 @@ public class PersistentVertex implements Vertex {
 
         return vCol1;
 
-       //  SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = "a" AND edges.outV = verticies.vertex_id;
-
-//        Collection<Vertex> vertexCollection;
-//        Collection<Vertex> vertexCollection1 = new ArrayList<Vertex>();
-//        Collection<Vertex> vertexCollection2 = new ArrayList<Vertex>();
-//
-//        vertexCollection = this.getVertices(direction, labels);
-//        Iterator<Vertex> it = vertexCollection.iterator();
-//
-//        while(it.hasNext()){
-//            vertexCollection1.addAll(it.next().getVertices(direction, labels));
-//        }
-//
-//        vertexCollection = this.getVertices(direction, labels);
-//        Iterator<Vertex> it1 = vertexCollection1.iterator();
-//
-//        while(it1.hasNext()){
-//            vertexCollection2.addAll(it1.next().getVertices(direction, labels));
-//        }
-//
-//        return vertexCollection2;
-//        return this.getVertices(direction).stream().flatMap(v -> v.getVertices(direction).stream())
-//                .flatMap(v -> v.getVertices(direction).stream()).toList();
     }
 
     @Override
     public Collection<Vertex> getVertices(Direction direction, String key, Object value, String... labels) throws IllegalArgumentException {
         String selectQuery = "";
         if (labels.length != 0) {
-            if(direction == Direction.OUT)
+            if (direction == Direction.OUT)
                 selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(edge_id, '|', 3), '|', -1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
-           else // Direction.IN
+            else // Direction.IN
                 selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT DISTINCT SUBSTRING_INDEX(a.edge_id, '|', 1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
 
             for (int i = 0; i < labels.length; i++) {
