@@ -221,7 +221,7 @@ public class SmallDataSetCustomV2 {
                 min11 = elapsedTime;
             }
         }
-        resultForTest[21] = min11;
+        resultForTest[21] = min11C;
         System.out.println("[21] " + resultForTest[21]);
         System.out.println("[P5] " + min11);
 

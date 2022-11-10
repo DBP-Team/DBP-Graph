@@ -165,13 +165,11 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Collection<Vertex> getVertices(Direction direction, String... labels) throws IllegalArgumentException {
-        String selectQuery = "SELECT DISTINCT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE ";
+        String selectQuery = "";
         if (direction == Direction.OUT) {
-            selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
-        } else if (direction == Direction.IN) {
-            selectQuery += "edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
-        } else { // dierection == Direction.BOTH
-            selectQuery += "(edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id) OR (edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id)";
+            selectQuery = "SELECT vertex_id, properties FROM verticies NATURAL JOIN (SELECT inV AS vertex_id FROM edges WHERE outV = '" + id + "'";
+        } else { //direction == Direction.IN
+            selectQuery = "SELECT vertex_id, properties FROM verticies NATURAL JOIN (SELECT outV AS vertex_id FROM edges WHERE inV = '" + id + "'";
         }
         if (labels.length != 0) {
             selectQuery += " AND (";
@@ -182,6 +180,7 @@ public class PersistentVertex implements Vertex {
             }
             selectQuery += " )";
         }
+        selectQuery += ") AS a";
         //System.out.println(selectQuery);
         Collection<Vertex> verticies = new ArrayList<Vertex>();
         try {
@@ -212,27 +211,70 @@ public class PersistentVertex implements Vertex {
     @Override
     public Collection<Vertex> getTwoHopVertices(Direction direction, String... labels) throws IllegalArgumentException {
 
-        Collection<Vertex> vertexCollection;
-        Collection<Vertex> vertexCollection1 = new ArrayList<Vertex>();
-        Collection<Vertex> vertexCollection2 = new ArrayList<Vertex>();
+        Collection<Vertex> vCol1 = new ArrayList<Vertex>();
 
-        vertexCollection = this.getVertices(direction, labels);
-        Iterator<Vertex> it = vertexCollection.iterator();
+        if(direction == Direction.OUT) {
+            String query = "SELECT edges.inV AS result FROM" +
+                    " (SELECT edges.inV FROM (SELECT DISTINCT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.outV = '" + this.id + "' AND edges.inV = verticies.vertex_id) AS r1 JOIN edges" +
+                    " WHERE r1.vertex_id = edges.outV) AS r2 JOIN edges WHERE r2.inV = edges.outV";
+            if (labels.length > 0) {
+                query += " AND (";
+                for (int i = 0; i < labels.length; i++) {
+                    query += "label = '" + labels[i] + "'";
+                    if (i != labels.length - 1) {
+                        query += " OR ";
+                    }
+                }
+                query += ")";
+            }
+            query += ";";
 
-        while(it.hasNext()){
-            vertexCollection1.addAll(it.next().getVertices(direction, labels));
+            try {
+                ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+                while (rs.next()) {
+                    String vId = rs.getString(1);
+                    vCol1.add(getVertex(vId));
+                }
+            }catch (SQLException e){
+                System.out.println("Exception Occur: " + e);
+            } catch (IOException e) {
+                System.out.println("Exception Occur: " + e);
+            }
         }
 
-//        vertexCollection = this.getVertices(direction, labels);
-        Iterator<Vertex> it1 = vertexCollection1.iterator();
+        else{// IN
+            String query = "SELECT edges.outV AS result FROM" +
+                    " (SELECT edges.outV FROM (SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '"+ this.id+"' AND edges.outV = verticies.vertex_id) AS r1 JOIN edges" +
+                    " WHERE r1.vertex_id = edges.inV) as r2 JOIN edges WHERE r2.outV = edges.inV";
+            if (labels.length > 0) {
+                query += " AND (";
+                for (int i = 0; i < labels.length; i++) {
+                    query += "label = '" + labels[i] + "'";
 
-        while(it1.hasNext()){
-            vertexCollection2.addAll(it1.next().getVertices(direction, labels));
+                    if (i != labels.length - 1) {
+                        query += " OR ";
+                    }
+                }
+                query += ")";
+            }
+            query += ";";
+
+            try {
+                ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+
+                while (rs.next()) {
+                    String vId = rs.getString(1);
+                    vCol1.add(getVertex(vId));
+                }
+            }catch (SQLException e){
+                System.out.println("Exception Occur: " + e);
+            } catch (IOException e) {
+                System.out.println("Exception Occur: " + e);
+            }
         }
 
-        return vertexCollection2;
-//        return this.getVertices(direction).stream().flatMap(v -> v.getVertices(direction).stream())
-//                .flatMap(v -> v.getVertices(direction).stream()).toList();
+        return vCol1;
+
     }
 
     @Override
@@ -240,9 +282,9 @@ public class PersistentVertex implements Vertex {
         String selectQuery = "";
         if (labels.length != 0) {
             if(direction == Direction.OUT)
-                selectQuery = "SELECT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
            else // Direction.IN
-                selectQuery = "SELECT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(a.edge_id, '|', 1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(a.edge_id, '|', 1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
 
             for (int i = 0; i < labels.length; i++) {
                 selectQuery += " label = '" + labels[i] + "'";
@@ -252,9 +294,9 @@ public class PersistentVertex implements Vertex {
             selectQuery += " )) AS b ON a.vertex_id = b.id";
         } else {
             if (direction == Direction.OUT) {
-                selectQuery = "SELECT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS id FROM edge_properties WHERE edge_id LIKE '" + id + "|%' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b ON a.vertex_id = b.id";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS vertex_id FROM edge_properties WHERE edge_id LIKE '" + id + "|%' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b";
             } else { // Direction.IN
-                selectQuery = "SELECT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', 1) AS id FROM edge_properties WHERE edge_id LIKE '%|" + id + "' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b ON a.vertex_id = b.id";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', 1) AS vertex_id FROM edge_properties WHERE edge_id LIKE '%|" + id + "' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b";
 
             }
         }
