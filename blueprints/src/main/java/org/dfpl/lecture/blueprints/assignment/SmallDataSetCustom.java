@@ -24,7 +24,7 @@ public class SmallDataSetCustom {
         String fileName = "./blueprints/data/CollegeMsg.txt";
         String delimiter = "\\s";
         String dbID = "root";
-        String dbPW = "0210";
+        String dbPW = "1234";
         String dbName = "team7";
 
         BufferedReader r = new BufferedReader(new FileReader(fileName));
@@ -92,118 +92,118 @@ public class SmallDataSetCustom {
         System.out.println("[2] " + maxOutDegree);
         System.out.println("[3] " + maxInDegreeID);
         System.out.println("[4] " + maxInDegree);
-//        System.out.println("[5] " + g.getVertices().size());
-//        System.out.println("[6] " + g.getEdges().size());
-//        System.out.println("[7] " + g.getEdges(isEvenTag, true).size());
-//        System.out.println("[8] " + g.getEdges(isEvenTag, false).size());
-//        System.out.println("[9] " + g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).size());
-//        System.out.println("[10] " + g.getVertex(maxInDegreeID).getVertices(Direction.IN).size());
-//
-//        System.out.println("[11] " + g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).stream()
-//                .flatMap(v -> v.getVertices(Direction.OUT).stream()).toList().size());
-//        System.out.println("[12] " + g.getVertex(maxInDegreeID).getVertices(Direction.IN).stream()
-//                .flatMap(v -> v.getVertices(Direction.IN).stream()).toList().size());
-//        System.out.println("[13] " + g.getVertex(maxOutDegreeID).getVertices(Direction.OUT, isEvenTag, true).stream()
-//                .flatMap(v -> v.getVertices(Direction.OUT, isEvenTag, false).stream()).toList().size());
-//        System.out.println("[14] " + g.getVertex(maxInDegreeID).getVertices(Direction.IN, isEvenTag, true).stream()
-//                .flatMap(v -> v.getVertices(Direction.IN, isEvenTag, false).stream()).toList().size());
-//        System.out.println("[15] " + g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).stream()
-//                .flatMap(v -> v.getVertices(Direction.OUT).stream()).flatMap(v -> v.getVertices(Direction.OUT).stream())
-//                .toList().size());
-//        System.out.println("[16] " + g.getVertex(maxInDegreeID).getVertices(Direction.IN).stream()
-//                .flatMap(v -> v.getVertices(Direction.IN).stream()).flatMap(v -> v.getVertices(Direction.IN).stream())
-//                .toList().size());
-//
-//        long min7 = Long.MAX_VALUE;
-//        int min7C = 0;
-//        for (int i = 0; i < 10; i++) {
-//            long pre = System.nanoTime();
-//            min7C = g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).stream().flatMap(v -> v.getVertices(Direction.OUT).stream())
-//                    .toList().size();
-//            long elapsedTime = System.nanoTime() - pre;
-//            if (elapsedTime < min7) {
-//                System.out.println("\t" + min7 + " -> " + elapsedTime);
-//                min7 = elapsedTime;
-//
-//            }
-//        }
-//        System.out.println("[17] " + min7C);
-//        System.out.println("[P1] " + min7);
-//
-//        long min8 = Long.MAX_VALUE;
-//        int min8C = 0;
-//        for (int i = 0; i < 10; i++) {
-//            long pre = System.nanoTime();
-//            min8C = g.getVertex(maxInDegreeID).getVertices(Direction.IN).stream().flatMap(v -> v.getVertices(Direction.IN).stream())
-//                    .toList().size();
-//            long elapsedTime = System.nanoTime() - pre;
-//            if (elapsedTime < min8) {
-//                System.out.println("\t" + min8 + " -> " + elapsedTime);
-//                min8 = elapsedTime;
-//            }
-//        }
-//        System.out.println("[18] " + min8C);
-//        System.out.println("[P2] " + min8);
-//
-//        long min9 = Long.MAX_VALUE;
-//        int min9C = 0;
-//        for (int i = 0; i < 10; i++) {
-//            long pre = System.nanoTime();
-//            min9C = g.getVertex(maxOutDegreeID).getVertices(Direction.OUT, isEvenTag, true).stream()
-//                    .flatMap(v -> v.getVertices(Direction.OUT, isEvenTag, false).stream()).toList().size();
-//            long elapsedTime = System.nanoTime() - pre;
-//            if (elapsedTime < min9) {
-//                System.out.println("\t" + min9 + " -> " + elapsedTime);
-//                min9 = elapsedTime;
-//            }
-//        }
-//        System.out.println("[19] " + min9C);
-//        System.out.println("[P3] " + min9);
-//
-//        long min10 = Long.MAX_VALUE;
-//        int min10C = 0;
-//        for (int i = 0; i < 10; i++) {
-//            long pre = System.nanoTime();
-//            min10C = g.getVertex(maxInDegreeID).getVertices(Direction.IN, isEvenTag, true).stream()
-//                    .flatMap(v -> v.getVertices(Direction.IN, isEvenTag, false).stream()).toList().size();
-//            long elapsedTime = System.nanoTime() - pre;
-//            if (elapsedTime < min10) {
-//                System.out.println("\t" + min10 + " -> " + elapsedTime);
-//                min10 = elapsedTime;
-//            }
-//        }
-//        System.out.println("[20] " + min10C);
-//        System.out.println("[P4] " + min10);
-//
-//        long min11 = Long.MAX_VALUE;
-//        int min11C = 0;
-//        for (int i = 0; i < 5; i++) {
-//            long pre = System.nanoTime();
-//            min11C = g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).stream().flatMap(v -> v.getVertices(Direction.OUT).stream())
-//                    .flatMap(v -> v.getVertices(Direction.OUT).stream()).toList().size();
-//            long elapsedTime = System.nanoTime() - pre;
-//            if (elapsedTime < min11) {
-//                System.out.println("\t" + min11 + " -> " + elapsedTime);
-//                min11 = elapsedTime;
-//            }
-//        }
-//        System.out.println("[21] " + min11C);
-//        System.out.println("[P5] " + min11);
-//
-//        long min12 = Long.MAX_VALUE;
-//        int min12C = 0;
-//        for (int i = 0; i < 5; i++) {
-//            long pre = System.nanoTime();
-//            min12C = g.getVertex(maxInDegreeID).getVertices(Direction.IN).stream().flatMap(v -> v.getVertices(Direction.IN).stream())
-//                    .flatMap(v -> v.getVertices(Direction.IN).stream()).toList().size();
-//            long elapsedTime = System.nanoTime() - pre;
-//            if (elapsedTime < min12) {
-//                System.out.println("\t" + min12 + " -> " + elapsedTime);
-//                min12 = elapsedTime;
-//            }
-//        }
-//        System.out.println("[22] " + min12C);
-//        System.out.println("[P6] " + min12);
+        System.out.println("[5] " + g.getVertices().size());
+        System.out.println("[6] " + g.getEdges().size());
+        System.out.println("[7] " + g.getEdges(isEvenTag, true).size());
+        System.out.println("[8] " + g.getEdges(isEvenTag, false).size());
+        System.out.println("[9] " + g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).size());
+        System.out.println("[10] " + g.getVertex(maxInDegreeID).getVertices(Direction.IN).size());
+
+        System.out.println("[11] " + g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).stream()
+                .flatMap(v -> v.getVertices(Direction.OUT).stream()).toList().size());
+        System.out.println("[12] " + g.getVertex(maxInDegreeID).getVertices(Direction.IN).stream()
+                .flatMap(v -> v.getVertices(Direction.IN).stream()).toList().size());
+        System.out.println("[13] " + g.getVertex(maxOutDegreeID).getVertices(Direction.OUT, isEvenTag, true).stream()
+                .flatMap(v -> v.getVertices(Direction.OUT, isEvenTag, false).stream()).toList().size());
+        System.out.println("[14] " + g.getVertex(maxInDegreeID).getVertices(Direction.IN, isEvenTag, true).stream()
+                .flatMap(v -> v.getVertices(Direction.IN, isEvenTag, false).stream()).toList().size());
+        System.out.println("[15] " + g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).stream()
+                .flatMap(v -> v.getVertices(Direction.OUT).stream()).flatMap(v -> v.getVertices(Direction.OUT).stream())
+                .toList().size());
+        System.out.println("[16] " + g.getVertex(maxInDegreeID).getVertices(Direction.IN).stream()
+                .flatMap(v -> v.getVertices(Direction.IN).stream()).flatMap(v -> v.getVertices(Direction.IN).stream())
+                .toList().size());
+
+        long min7 = Long.MAX_VALUE;
+        int min7C = 0;
+        for (int i = 0; i < 10; i++) {
+            long pre = System.nanoTime();
+            min7C = g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).stream().flatMap(v -> v.getVertices(Direction.OUT).stream())
+                    .toList().size();
+            long elapsedTime = System.nanoTime() - pre;
+            if (elapsedTime < min7) {
+                System.out.println("\t" + min7 + " -> " + elapsedTime);
+                min7 = elapsedTime;
+
+            }
+        }
+        System.out.println("[17] " + min7C);
+        System.out.println("[P1] " + min7);
+
+        long min8 = Long.MAX_VALUE;
+        int min8C = 0;
+        for (int i = 0; i < 10; i++) {
+            long pre = System.nanoTime();
+            min8C = g.getVertex(maxInDegreeID).getVertices(Direction.IN).stream().flatMap(v -> v.getVertices(Direction.IN).stream())
+                    .toList().size();
+            long elapsedTime = System.nanoTime() - pre;
+            if (elapsedTime < min8) {
+                System.out.println("\t" + min8 + " -> " + elapsedTime);
+                min8 = elapsedTime;
+            }
+        }
+        System.out.println("[18] " + min8C);
+        System.out.println("[P2] " + min8);
+
+        long min9 = Long.MAX_VALUE;
+        int min9C = 0;
+        for (int i = 0; i < 10; i++) {
+            long pre = System.nanoTime();
+            min9C = g.getVertex(maxOutDegreeID).getVertices(Direction.OUT, isEvenTag, true).stream()
+                    .flatMap(v -> v.getVertices(Direction.OUT, isEvenTag, false).stream()).toList().size();
+            long elapsedTime = System.nanoTime() - pre;
+            if (elapsedTime < min9) {
+                System.out.println("\t" + min9 + " -> " + elapsedTime);
+                min9 = elapsedTime;
+            }
+        }
+        System.out.println("[19] " + min9C);
+        System.out.println("[P3] " + min9);
+
+        long min10 = Long.MAX_VALUE;
+        int min10C = 0;
+        for (int i = 0; i < 10; i++) {
+            long pre = System.nanoTime();
+            min10C = g.getVertex(maxInDegreeID).getVertices(Direction.IN, isEvenTag, true).stream()
+                    .flatMap(v -> v.getVertices(Direction.IN, isEvenTag, false).stream()).toList().size();
+            long elapsedTime = System.nanoTime() - pre;
+            if (elapsedTime < min10) {
+                System.out.println("\t" + min10 + " -> " + elapsedTime);
+                min10 = elapsedTime;
+            }
+        }
+        System.out.println("[20] " + min10C);
+        System.out.println("[P4] " + min10);
+
+        long min11 = Long.MAX_VALUE;
+        int min11C = 0;
+        for (int i = 0; i < 5; i++) {
+            long pre = System.nanoTime();
+            min11C = g.getVertex(maxOutDegreeID).getVertices(Direction.OUT).stream().flatMap(v -> v.getVertices(Direction.OUT).stream())
+                    .flatMap(v -> v.getVertices(Direction.OUT).stream()).toList().size();
+            long elapsedTime = System.nanoTime() - pre;
+            if (elapsedTime < min11) {
+                System.out.println("\t" + min11 + " -> " + elapsedTime);
+                min11 = elapsedTime;
+            }
+        }
+        System.out.println("[21] " + min11C);
+        System.out.println("[P5] " + min11);
+
+        long min12 = Long.MAX_VALUE;
+        int min12C = 0;
+        for (int i = 0; i < 5; i++) {
+            long pre = System.nanoTime();
+            min12C = g.getVertex(maxInDegreeID).getVertices(Direction.IN).stream().flatMap(v -> v.getVertices(Direction.IN).stream())
+                    .flatMap(v -> v.getVertices(Direction.IN).stream()).toList().size();
+            long elapsedTime = System.nanoTime() - pre;
+            if (elapsedTime < min12) {
+                System.out.println("\t" + min12 + " -> " + elapsedTime);
+                min12 = elapsedTime;
+            }
+        }
+        System.out.println("[22] " + min12C);
+        System.out.println("[P6] " + min12);
 
         long min13 = Long.MAX_VALUE;
         int min13C = 0;
