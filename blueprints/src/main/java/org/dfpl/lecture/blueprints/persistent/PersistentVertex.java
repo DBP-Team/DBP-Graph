@@ -210,9 +210,15 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Collection<Vertex> getTwoHopVertices(Direction direction, String... labels) throws IllegalArgumentException {
-
         Collection<Vertex> vCol1 = new ArrayList<Vertex>();
-
+        // example
+        // SELECT edges.inV AS result
+        // FROM (SELECT edges.inV
+        //       FROM (SELECT DISTINCT verticies.vertex_id, verticies.properties
+        //             FROM verticies JOIN edges
+        //             WHERE edges.outV = '9' AND edges.inV = verticies.vertex_id) AS r1
+        //       JOIN edges WHERE r1.vertex_id = edges.outV) AS r2
+        // JOIN edges WHERE r2.inV = edges.outV;
         if(direction == Direction.OUT) {
             String query = "SELECT edges.inV AS result FROM" +
                     " (SELECT edges.inV FROM (SELECT DISTINCT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.outV = '" + this.id + "' AND edges.inV = verticies.vertex_id) AS r1 JOIN edges" +
@@ -274,7 +280,6 @@ public class PersistentVertex implements Vertex {
         }
 
         return vCol1;
-
     }
 
     @Override
@@ -285,7 +290,6 @@ public class PersistentVertex implements Vertex {
                 selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
            else // Direction.IN
                 selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(a.edge_id, '|', 1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
-
             for (int i = 0; i < labels.length; i++) {
                 selectQuery += " label = '" + labels[i] + "'";
                 if (i < labels.length - 1)
