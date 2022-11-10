@@ -16,7 +16,7 @@ public class SmallDataSetCustomV2 {
     public static String addTag = "add";
     public static String subTag = "sub";
     public static String divTag = "div";
-    public static long[] resultForTest = new long[24];
+    public static long[] resultForTest = new long[] {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};;
     public static void main(String[] args) throws Exception {
 
         // 참고: 평가를 위한 데이터셋은 보다 작은 데이터4을 활용 (예: CollegeMsg.txt, http://snap.stanford.edu/data/index.html)
@@ -221,7 +221,7 @@ public class SmallDataSetCustomV2 {
                 min11 = elapsedTime;
             }
         }
-        resultForTest[21] = min11;
+        resultForTest[21] = min11C;
         System.out.println("[21] " + resultForTest[21]);
         System.out.println("[P5] " + min11);
 
