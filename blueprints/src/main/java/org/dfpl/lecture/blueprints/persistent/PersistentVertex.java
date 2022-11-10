@@ -212,9 +212,9 @@ public class PersistentVertex implements Vertex {
         String selectQuery = "";
         if (labels.length != 0) {
             if(direction == Direction.OUT)
-                selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(edge_id, '|', 3), '|', -1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
            else // Direction.IN
-                selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT DISTINCT SUBSTRING_INDEX(a.edge_id, '|', 1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(a.edge_id, '|', 1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
 
             for (int i = 0; i < labels.length; i++) {
                 selectQuery += " label = '" + labels[i] + "'";
@@ -224,9 +224,9 @@ public class PersistentVertex implements Vertex {
             selectQuery += " )) AS b ON a.vertex_id = b.id";
         } else {
             if (direction == Direction.OUT) {
-                selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(edge_id, '|', 3), '|', -1) AS id FROM edge_properties WHERE edge_id LIKE '" + id + "|%' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b ON a.vertex_id = b.id";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS id FROM edge_properties WHERE edge_id LIKE '" + id + "|%' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b ON a.vertex_id = b.id";
             } else { // Direction.IN
-                selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', 1) AS id FROM edge_properties WHERE edge_id LIKE '%|" + id + "' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b ON a.vertex_id = b.id";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', 1) AS id FROM edge_properties WHERE edge_id LIKE '%|" + id + "' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b ON a.vertex_id = b.id";
 
             }
         }
