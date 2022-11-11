@@ -165,13 +165,11 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Collection<Vertex> getVertices(Direction direction, String... labels) throws IllegalArgumentException {
-        String selectQuery = "SELECT DISTINCT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE ";
+        String selectQuery = "";
         if (direction == Direction.OUT) {
-            selectQuery += "edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id";
-        } else if (direction == Direction.IN) {
-            selectQuery += "edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id";
-        } else { // dierection == Direction.BOTH
-            selectQuery += "(edges.outV = '" + id + "' AND edges.inV = verticies.vertex_id) OR (edges.inV = '" + id + "' AND edges.outV = verticies.vertex_id)";
+            selectQuery = "SELECT vertex_id, properties FROM verticies NATURAL JOIN (SELECT inV AS vertex_id FROM edges WHERE outV = '" + id + "'";
+        } else { //direction == Direction.IN
+            selectQuery = "SELECT vertex_id, properties FROM verticies NATURAL JOIN (SELECT outV AS vertex_id FROM edges WHERE inV = '" + id + "'";
         }
         if (labels.length != 0) {
             selectQuery += " AND (";
@@ -182,13 +180,16 @@ public class PersistentVertex implements Vertex {
             }
             selectQuery += " )";
         }
+        selectQuery += ") AS a";
         //System.out.println(selectQuery);
         Collection<Vertex> verticies = new ArrayList<Vertex>();
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
+            HashMap<String, Object> map = null;
             while (rs.next()) {
                 String vertexId = rs.getString(1);
-                verticies.add(getVertex(vertexId));
+                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+                verticies.add(new PersistentVertex(vertexId, map));
             }
         } catch (SQLException exception) {
             System.out.println(exception);
@@ -287,11 +288,10 @@ public class PersistentVertex implements Vertex {
     public Collection<Vertex> getVertices(Direction direction, String key, Object value, String... labels) throws IllegalArgumentException {
         String selectQuery = "";
         if (labels.length != 0) {
-            if (direction == Direction.OUT)
-                selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(edge_id, '|', 3), '|', -1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
-            else // Direction.IN
-                selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT DISTINCT SUBSTRING_INDEX(a.edge_id, '|', 1) AS id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
-
+            if(direction == Direction.OUT)
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
+           else // Direction.IN
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(a.edge_id, '|', 1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
             for (int i = 0; i < labels.length; i++) {
                 selectQuery += " label = '" + labels[i] + "'";
                 if (i < labels.length - 1)
@@ -300,9 +300,9 @@ public class PersistentVertex implements Vertex {
             selectQuery += " )) AS b ON a.vertex_id = b.id";
         } else {
             if (direction == Direction.OUT) {
-                selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(edge_id, '|', 3), '|', -1) AS id FROM edge_properties WHERE edge_id LIKE '" + id + "|%' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b ON a.vertex_id = b.id";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS vertex_id FROM edge_properties WHERE edge_id LIKE '" + id + "|%' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b";
             } else { // Direction.IN
-                selectQuery = "SELECT DISTINCT vertex_id, properties FROM verticies AS a JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', 1) AS id FROM edge_properties WHERE edge_id LIKE '%|" + id + "' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b ON a.vertex_id = b.id";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', 1) AS vertex_id FROM edge_properties WHERE edge_id LIKE '%|" + id + "' AND (key_ = '" + key + "' AND value_ = '" + value.toString() + "')) AS b";
 
             }
         }
@@ -310,9 +310,11 @@ public class PersistentVertex implements Vertex {
         Collection<Vertex> verticies = new ArrayList<Vertex>();
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
+            HashMap<String, Object> map = null;
             while (rs.next()) {
                 String vertexId = rs.getString(1);
-                verticies.add(getVertex(vertexId));
+                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+                verticies.add(new PersistentVertex(vertexId, map));
             }
         } catch (SQLException e) {
             System.out.println(e);
