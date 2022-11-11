@@ -185,9 +185,11 @@ public class PersistentVertex implements Vertex {
         Collection<Vertex> verticies = new ArrayList<Vertex>();
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
+            HashMap<String, Object> map = null;
             while (rs.next()) {
                 String vertexId = rs.getString(1);
-                verticies.add(getVertex(vertexId));
+                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+                verticies.add(new PersistentVertex(vertexId, map));
             }
         } catch (SQLException exception) {
             System.out.println(exception);
@@ -308,9 +310,11 @@ public class PersistentVertex implements Vertex {
         Collection<Vertex> verticies = new ArrayList<Vertex>();
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
+            HashMap<String, Object> map = null;
             while (rs.next()) {
                 String vertexId = rs.getString(1);
-                verticies.add(getVertex(vertexId));
+                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+                verticies.add(new PersistentVertex(vertexId, map));
             }
         } catch (SQLException e) {
             System.out.println(e);
