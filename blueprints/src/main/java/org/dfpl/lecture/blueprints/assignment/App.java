@@ -3,9 +3,8 @@ package org.dfpl.lecture.blueprints.assignment;
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.dfpl.lecture.blueprints.persistent.PersistentEdge;
-import org.dfpl.lecture.blueprints.persistent.PersistentGraph;
-import org.dfpl.lecture.blueprints.persistent.PersistentVertex;
+import org.dfpl.lecture.blueprints.persistent.team7.PersistentGraph;
+import org.dfpl.lecture.blueprints.persistent.team7.PersistentVertex;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
