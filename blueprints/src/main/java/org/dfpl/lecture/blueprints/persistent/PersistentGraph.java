@@ -22,7 +22,7 @@ public class PersistentGraph implements Graph {
 
     public PersistentGraph(String id, String pw, String dbName) {
         try {
-            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306", id, pw);
+            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3307", id, pw);
             stmt = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -31,9 +31,9 @@ public class PersistentGraph implements Graph {
         try {
             stmt.executeUpdate("CREATE OR REPLACE DATABASE " + dbName);
             stmt.executeUpdate("USE " + dbName);
-            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50), " +
+            stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id int PRIMARY KEY, properties json)");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV int, inV int, label varchar(50), properties json);");
+            stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id int, " +
                     "FOREIGN KEY (vertex_id) REFERENCES verticies (vertex_id) ON DELETE CASCADE, PRIMARY KEY (vertex_id, key_));");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50), " +
                     "FOREIGN KEY (edge_id) REFERENCES edges (edge_id) ON DELETE CASCADE, PRIMARY KEY (edge_id, key_));");
@@ -64,7 +64,7 @@ public class PersistentGraph implements Graph {
         if (id.contains("|"))
             throw new IllegalArgumentException("id cannot contain '|'");
         try {
-            String query = "INSERT IGNORE INTO verticies values('" + id + "', '{}');";
+            String query = "INSERT IGNORE INTO verticies values(" + id + ", '{}');";
             stmt.executeQuery(query); // id duplication check ?
             return new PersistentVertex(id);
         } catch (SQLException e) {
@@ -82,7 +82,7 @@ public class PersistentGraph implements Graph {
          */
         HashMap<String, Object> map = null;
         try {
-            ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=" + id + ";");
             if (rs.next())
                 map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
             else
@@ -109,7 +109,7 @@ public class PersistentGraph implements Graph {
     @Override
     public void removeVertex(Vertex vertex) {
         try {
-            stmt.executeQuery("DELETE FROM verticies WHERE vertex_id=\'" + vertex.getId() + "\';");
+            stmt.executeQuery("DELETE FROM verticies WHERE vertex_id=" + vertex.getId() + ";");
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
         }
@@ -183,7 +183,7 @@ public class PersistentGraph implements Graph {
             return edge;
         try {
             edge = new PersistentEdge(id, outVertex, inVertex, label);
-            String query = "INSERT IGNORE INTO edges VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', '{}');";
+            String query = "INSERT IGNORE INTO edges VALUES('" + id + "', " + outVertex.getId() + ", " + inVertex.getId() + ", '" + label + "', '{}');";
             stmt.executeUpdate(query);
 
         } catch (SQLException e) {

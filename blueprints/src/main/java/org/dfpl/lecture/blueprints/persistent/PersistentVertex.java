@@ -48,8 +48,8 @@ public class PersistentVertex implements Vertex {
     @Override
     public void setProperty(String key, Object value) {
         String verticiesUpdateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
-                " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\'";
-        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+                " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=" + this.id + "";
+        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', " + this.id + ")";
 
         try {
             PersistentGraph.stmt.executeUpdate(verticiesUpdateQuery);
@@ -57,8 +57,8 @@ public class PersistentVertex implements Vertex {
             // 1. insert 에서 exception 발생 시 update
             // 2. select 로 이미 있는지 알아낸 다음 update
         } catch (SQLException e) {
-            String propertiesUpdateQuery = "UPDATE vertex_properties SET value_='" + value + "' WHERE vertex_id = '"
-                    + this.id + "' AND key_ ='" + key + "'";
+            String propertiesUpdateQuery = "UPDATE vertex_properties SET value_='" + value + "' WHERE vertex_id = "
+                    + this.id + " AND key_ ='" + key + "'";
             try {
                 PersistentGraph.stmt.executeUpdate(propertiesUpdateQuery);
             } catch (SQLException e2) {
@@ -71,9 +71,9 @@ public class PersistentVertex implements Vertex {
     @Override
     public Object removeProperty(String key) {
         String updateVerticiesQuery = "UPDATE verticies SET properties=" +
-                "JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
-        String deletePropertiesQuery = "DELETE FROM vertex_properties WHERE vertex_id = '"
-                + this.id + "' AND key_ = '" + key + "'";
+                "JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=" + this.id + ";";
+        String deletePropertiesQuery = "DELETE FROM vertex_properties WHERE vertex_id = "
+                + this.id + " AND key_ = '" + key + "'";
         try {
             PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
             PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
@@ -98,7 +98,7 @@ public class PersistentVertex implements Vertex {
         else // Direction.IN
             condition = "inV = ";
 
-        query = "SELECT * FROM edges WHERE " + condition + "\'" + this.id + "\'";
+        query = "SELECT * FROM edges WHERE " + condition  + this.id ;
 
         if (labels.length > 0) {
             query += " AND (";
@@ -146,7 +146,7 @@ public class PersistentVertex implements Vertex {
 
     private Vertex getVertex(String VertexName) throws SQLException, IOException {
         HashMap<String, Object> prop = null;
-        ResultSet rs = PersistentGraph.stmt.executeQuery("SELECT properties FROM verticies WHERE vertex_id =\'" + VertexName + "\';");
+        ResultSet rs = PersistentGraph.stmt.executeQuery("SELECT properties FROM verticies WHERE vertex_id =" + VertexName + ";");
 
         try {
             if (rs.next())
@@ -167,9 +167,9 @@ public class PersistentVertex implements Vertex {
     public Collection<Vertex> getVertices(Direction direction, String... labels) throws IllegalArgumentException {
         String selectQuery = "";
         if (direction == Direction.OUT) {
-            selectQuery = "SELECT vertex_id, properties FROM verticies NATURAL JOIN (SELECT inV AS vertex_id FROM edges WHERE outV = '" + id + "'";
+            selectQuery = "SELECT vertex_id, properties FROM verticies NATURAL JOIN (SELECT inV AS vertex_id FROM edges WHERE outV = " + id + "";
         } else { //direction == Direction.IN
-            selectQuery = "SELECT vertex_id, properties FROM verticies NATURAL JOIN (SELECT outV AS vertex_id FROM edges WHERE inV = '" + id + "'";
+            selectQuery = "SELECT vertex_id, properties FROM verticies NATURAL JOIN (SELECT outV AS vertex_id FROM edges WHERE inV = " + id + "";
         }
         if (labels.length != 0) {
             selectQuery += " AND (";
@@ -223,7 +223,7 @@ public class PersistentVertex implements Vertex {
         // JOIN edges WHERE r2.inV = edges.outV;
         if(direction == Direction.OUT) {
             String query = "SELECT edges.inV AS result FROM" +
-                    " (SELECT edges.inV FROM (SELECT DISTINCT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.outV = '" + this.id + "' AND edges.inV = verticies.vertex_id) AS r1 JOIN edges" +
+                    " (SELECT edges.inV FROM (SELECT DISTINCT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.outV = " + this.id + " AND edges.inV = verticies.vertex_id) AS r1 JOIN edges" +
                     " WHERE r1.vertex_id = edges.outV) AS r2 JOIN edges WHERE r2.inV = edges.outV";
             if (labels.length > 0) {
                 query += " AND (";
@@ -252,7 +252,7 @@ public class PersistentVertex implements Vertex {
 
         else{// IN
             String query = "SELECT edges.outV AS result FROM" +
-                    " (SELECT edges.outV FROM (SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = '"+ this.id+"' AND edges.outV = verticies.vertex_id) AS r1 JOIN edges" +
+                    " (SELECT edges.outV FROM (SELECT verticies.vertex_id, verticies.properties FROM verticies JOIN edges WHERE edges.inV = "+ this.id+" AND edges.outV = verticies.vertex_id) AS r1 JOIN edges" +
                     " WHERE r1.vertex_id = edges.inV) as r2 JOIN edges WHERE r2.outV = edges.inV";
             if (labels.length > 0) {
                 query += " AND (";
@@ -289,9 +289,9 @@ public class PersistentVertex implements Vertex {
         String selectQuery = "";
         if (labels.length != 0) {
             if(direction == Direction.OUT)
-                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = '" + id + "') AND (";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = " + id + ") AND (";
            else // Direction.IN
-                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(a.edge_id, '|', 1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = '" + id + "') AND (";
+                selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(a.edge_id, '|', 1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = " + id + ") AND (";
             for (int i = 0; i < labels.length; i++) {
                 selectQuery += " label = '" + labels[i] + "'";
                 if (i < labels.length - 1)
