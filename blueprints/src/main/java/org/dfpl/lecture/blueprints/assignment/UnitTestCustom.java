@@ -13,7 +13,7 @@ public class UnitTestCustom {
 
     public static void main(String[] args) throws SQLException, IOException {
 
-        Graph g = new PersistentGraph("root", "1234", "db1007");
+        Graph g = new PersistentGraph("root", "0210", "db1007");
         Vertex v1 = g.addVertex("1");
         System.out.println("[1] " + v1.getId());
         v1 = g.addVertex("1");
@@ -79,37 +79,6 @@ public class UnitTestCustom {
         Edge ac = g.addEdge(a, c, "l");
         Edge da = g.addEdge(d, a, "l");
         Edge ea = g.addEdge(e, a, "l");
-
-//        Vertex f = g.addVertex("f");
-//        Vertex gg = g.addVertex("gg");
-//        Vertex h = g.addVertex("h");
-//        Vertex i = g.addVertex("i");
-//        Vertex j = g.addVertex("j");
-//        Vertex k = g.addVertex("k");
-//
-//        Vertex x = g.addVertex("x");
-//        Vertex y = g.addVertex("y");
-//        Vertex z = g.addVertex("z");
-//        Vertex l = g.addVertex("l");
-//        Vertex m = g.addVertex("m");
-//        Vertex n = g.addVertex("n");
-//        Vertex t = g.addVertex("t");
-//
-//
-//        Edge bg = g.addEdge(b, gg, "l");
-//        Edge bh = g.addEdge(b, h, "l");
-//        Edge cf = g.addEdge(c, f, "l");
-//        Edge hj = g.addEdge(h, j, "l");
-//        Edge fk = g.addEdge(f, k, "l");
-//        Edge ai = g.addEdge(a, i, "l");
-//
-//        Edge xe = g.addEdge(x, e, "l");
-//        Edge yd = g.addEdge(y, d, "l");
-//        Edge nz = g.addEdge(n, z, "l");
-//        Edge lx = g.addEdge(l, x, "l");
-//        Edge my = g.addEdge(m, y, "l");
-//        Edge za = g.addEdge(z, a, "l");
-//        Edge ta = g.addEdge(t, a, "l");
 
 
         System.out.println("[28] " + a.getEdges(Direction.OUT).contains(ab));
