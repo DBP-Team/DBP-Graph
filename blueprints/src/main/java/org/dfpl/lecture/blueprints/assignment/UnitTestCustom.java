@@ -4,7 +4,7 @@ import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Graph;
 import com.tinkerpop.blueprints.revised.Vertex;
-import org.dfpl.lecture.blueprints.persistent.PersistentGraph;
+import org.dfpl.lecture.blueprints.persistent.team7.PersistentGraph;
 
 import java.io.IOException;
 import java.sql.SQLException;

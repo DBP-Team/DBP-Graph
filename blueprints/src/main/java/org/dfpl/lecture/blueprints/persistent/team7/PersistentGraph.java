@@ -1,4 +1,4 @@
-package org.dfpl.lecture.blueprints.persistent;
+package org.dfpl.lecture.blueprints.persistent.team7;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -37,7 +37,8 @@ public class PersistentGraph implements Graph {
                     "FOREIGN KEY (vertex_id) REFERENCES verticies (vertex_id) ON DELETE CASCADE, PRIMARY KEY (vertex_id, key_));");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50), " +
                     "FOREIGN KEY (edge_id) REFERENCES edges (edge_id) ON DELETE CASCADE, PRIMARY KEY (edge_id, key_));");
-//            stmt.executeUpdate("CREATE INDEX edges_index ON edges (inV, outV)");
+            stmt.executeUpdate("CREATE INDEX edges_index1 ON edges (inV)");
+            stmt.executeUpdate("CREATE INDEX edges_index2 ON edges (outV)");
             stmt.executeUpdate("CREATE INDEX edge_index ON edge_properties (key_, value_)");
             stmt.executeUpdate("CREATE INDEX vertex_index ON vertex_properties (key_, value_)");
             // CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50)), FOREIGN KEY vertex_id REFERENCES verticies vertex_id
