@@ -21,11 +21,15 @@ public class PersistentVertex implements Vertex {
     }
 
     public PersistentVertex(String id) {
+        if(!PersistentGraph.isNumeric(id))
+            id = PersistentGraph.makeIntId(id);
         this.id = id;
         this.properties = new HashMap<>();
     }
 
     public PersistentVertex(String id, HashMap<String, Object> properties) {
+        if(!PersistentGraph.isNumeric(id))
+            id = PersistentGraph.makeIntId(id);
         this.id = id;
         this.properties = properties;
     }
@@ -146,6 +150,8 @@ public class PersistentVertex implements Vertex {
 
     private Vertex getVertex(String VertexName) throws SQLException, IOException {
         HashMap<String, Object> prop = null;
+        if(!PersistentGraph.isNumeric(id))
+            id = PersistentGraph.makeIntId(id);
         ResultSet rs = PersistentGraph.stmt.executeQuery("SELECT properties FROM verticies WHERE vertex_id =" + VertexName + ";");
 
         try {

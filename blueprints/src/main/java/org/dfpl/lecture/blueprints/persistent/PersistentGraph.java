@@ -22,7 +22,7 @@ public class PersistentGraph implements Graph {
 
     public PersistentGraph(String id, String pw, String dbName) {
         try {
-            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3307", id, pw);
+            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306", id, pw);
             stmt = connection.createStatement();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -58,12 +58,26 @@ public class PersistentGraph implements Graph {
 
     // vertex_id | properties(KEY VALUE)
 
+    static boolean isNumeric(String str){
+        return str != null && str.matches("[0-9]+");
+    }
+
+    static String makeIntId(String id){
+        int idNum = 0;
+        for(int i=0;i<id.length();i++){
+            idNum += id.charAt(i)*(i+1);
+        }
+        return Integer.toString(idNum);
+    }
+
     @Override
     public Vertex addVertex(String id) throws IllegalArgumentException {
         Vertex v = null;
         if (id.contains("|"))
             throw new IllegalArgumentException("id cannot contain '|'");
         try {
+            if(!isNumeric(id))
+                id = makeIntId(id);
             String query = "INSERT IGNORE INTO verticies values(" + id + ", '{}');";
             stmt.executeQuery(query); // id duplication check ?
             return new PersistentVertex(id);
@@ -82,6 +96,8 @@ public class PersistentGraph implements Graph {
          */
         HashMap<String, Object> map = null;
         try {
+            if(!isNumeric(id))
+                id = makeIntId(id);
             ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=" + id + ";");
             if (rs.next())
                 map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
