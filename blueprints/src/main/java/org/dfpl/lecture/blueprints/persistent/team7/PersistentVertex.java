@@ -335,7 +335,7 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public void remove() {
-        String query = "DELETE FROM verticies WHERE vertex_id='" + this.id + "'";
+        String query = "DELETE FROM verticies WHERE vertex_id=" + this.id ;
         try {
             PersistentGraph.stmt.executeUpdate(query);
         } catch (SQLException e) {
