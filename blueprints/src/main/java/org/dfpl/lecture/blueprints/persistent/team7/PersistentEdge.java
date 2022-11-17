@@ -168,11 +168,8 @@ public class PersistentEdge implements Edge {
         String query = "SELECT properties FROM edges;";
         try{
             ResultSet rs = PersistentGraph.stmt.executeQuery(query);
-            String prop = rs.getString(1);
-            while (rs.next()) {
-                if (prop != null)
-                    map = new ObjectMapper().readValue(prop, HashMap.class);
-            }
+            while (rs.next())
+                map = new ObjectMapper().readValue(rs.getString(1), HashMap.class);
             returnObj = map.remove(key);
         }catch (SQLException e){
             System.out.println(e);
@@ -180,6 +177,12 @@ public class PersistentEdge implements Edge {
             System.out.println(e1);
         }
 
+//        return properties.remove(key);
+        // 1. Edge의 property를 모두 가지고 와서 hashmap으로 변환하고 함수 내부 변수로 저장
+        // 인자로 들어온 key를 해당 hashmap에서 삭제 및 DB에 업데이트한 사항 적용
+
+        // 2. 애포에 프로퍼티 가지고 올 때 key를 제외하고 가지고 와서
+        // 함수 내부 변수에 해시맵 변수 만들고 DB에 업데이트..???
         return returnObj;
     }
 }

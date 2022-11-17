@@ -16,17 +16,13 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public String toString() {
-        //return "id: " + id + "keySet" + properties.keySet();
-        return null;
+
+        return "id: " + id + "keySet" + getPropertyKeys();
     }
 
     public PersistentVertex(String id) {
         this.id = id;
     }
-
-//    public PersistentVertex(String id, HashMap<String, Object> properties) {
-//        this.id = id;
-//    }
 
     @Override
     public String getId() {

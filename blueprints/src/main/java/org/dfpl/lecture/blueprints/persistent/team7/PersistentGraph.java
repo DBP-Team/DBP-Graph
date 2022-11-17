@@ -76,35 +76,6 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Vertex getVertex(String id) {
-//        /**
-//         * mariaDB에서 vertices 값들을 불러와서
-//         * 그 중 properties를 바로 HashMap으로 변환시켜주고
-//         * MyVertex 생성자에 같이 넣어줍니다.
-//         */
-//        HashMap<String, Object> map = null;
-//        try {
-//            ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
-//            if (rs.next())
-//                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
-//            else
-//                return null;
-//        } catch (NullPointerException e) {
-//            /**
-//             * new ObjectMapper().readValue(null, HashMap.class); 시 NullPointerException
-//             */
-//            Vertex v = new PersistentVertex(id);
-//            return v;
-//        } catch (Exception e) {
-//            System.out.println("Exception Occur: " + e);
-//            /**
-//             * JsonMappingException
-//             * JsonParseException
-//             * IOException
-//             */
-//            System.out.println("occur Exception: " + e);
-//        }
-//        Vertex v = new PersistentVertex(id, map);
-//        return v;
         Vertex v = new PersistentVertex(id);
         return v;
     }
@@ -124,24 +95,6 @@ public class PersistentGraph implements Graph {
 //      https://gangnam-americano.tistory.com/41
 
         Collection<Vertex> arrayList = new ArrayList<Vertex>();
-//        try {
-//            ResultSet rs = stmt.executeQuery("SELECT * FROM verticies;");
-//            HashMap propertiesMap = null;
-//            while (rs.next()) {
-//                String id = rs.getString(1);
-//                String properties = rs.getString(2);
-//                if (properties != null) {
-//                    propertiesMap = new ObjectMapper().readValue(properties, HashMap.class);
-//                }
-//                arrayList.add(new PersistentVertex(id, propertiesMap));
-////                arrayList.add(this.getVertex(rs.getString(1)));
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Exception Occur: " + e);
-//        } catch (IOException e) {
-//            System.out.println("Exception Occur: " + e);
-//        }
-
         try {
             ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM verticies;");
             while (rs.next()) {
@@ -232,10 +185,7 @@ public class PersistentGraph implements Graph {
                 String outVertexString = rs.getString(2);
                 String inVertexString = rs.getString(3);
                 String label = rs.getString(4);
-//                String properties = rs.getString(5);
-//                if (properties != null) {
-//                    propertiesMap = new ObjectMapper().readValue(properties, HashMap.class);
-//                }
+
                 Vertex outVertex = getVertex(outVertexString);
                 Vertex inVertex = getVertex(inVertexString);
 
