@@ -33,9 +33,9 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("USE " + dbName);
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50), " +
+            stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50), value_type varchar(10), " +
                     "FOREIGN KEY (vertex_id) REFERENCES verticies (vertex_id) ON DELETE CASCADE, PRIMARY KEY (vertex_id, key_));");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50), " +
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50), value_type varchar(10), " +
                     "FOREIGN KEY (edge_id) REFERENCES edges (edge_id) ON DELETE CASCADE, PRIMARY KEY (edge_id, key_));");
             stmt.executeUpdate("CREATE INDEX edges_index1 ON edges (inV)");
             stmt.executeUpdate("CREATE INDEX edges_index2 ON edges (outV)");

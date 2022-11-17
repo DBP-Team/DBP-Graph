@@ -35,17 +35,23 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Object getProperty(String key) {
-        String query = "SELECT value_ FROM vertex_properties WHERE key_ = '" + key + "';";
+        String query = "SELECT value_, value_type FROM vertex_properties WHERE key_ = '" + key + "';";
         Object value = null;
         try{
             ResultSet rs = PersistentGraph.stmt.executeQuery(query);
-            while(rs.next()){
-                value = (Object) rs.getObject(1);
+            while(rs.next()) {
+                if (rs.getString(2).equals("Boolean"))
+                    value = rs.getBoolean(1);
+                else if (rs.getString(2).equals("Integer"))
+                    value = rs.getInt(1);
+                else if (rs.getString(2).equals("Double"))
+                    value = rs.getDouble(1);
+                else // == "String"
+                    value = rs.getString(1);
             }
         }catch (SQLException e){
             System.out.println(e);
         }
-
         return value;
     }
 
@@ -72,7 +78,7 @@ public class PersistentVertex implements Vertex {
     public void setProperty(String key, Object value) {
         String verticiesUpdateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\'";
-        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "', '" + value.getClass().getSimpleName() + "');";
 
         try {
             PersistentGraph.stmt.executeUpdate(verticiesUpdateQuery);

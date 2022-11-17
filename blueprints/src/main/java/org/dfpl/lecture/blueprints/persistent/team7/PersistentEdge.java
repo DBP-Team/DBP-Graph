@@ -82,12 +82,20 @@ public class PersistentEdge implements Edge {
 
     @Override
     public Object getProperty(String key) {
-        String query = "SELECT value_ FROM edge_properties WHERE key_ = '" + key + "';";
+        String query = "SELECT value_, value_type FROM edge_properties WHERE key_ = '" + key + "';";
         Object value = null;
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(query);
-            while(rs.next())
-                value = rs.getObject(1);
+            while(rs.next()) {
+                if (rs.getString(2).equals("Boolean"))
+                    value = rs.getBoolean(1);
+                else if (rs.getString(2).equals("Integer"))
+                    value = rs.getInt(1);
+                else if (rs.getString(2).equals("Double"))
+                    value = rs.getDouble(1);
+                else // == "String"
+                    value = rs.getString(1);
+            }
 
         }catch (SQLException e){
             System.out.println(e);
@@ -118,7 +126,7 @@ public class PersistentEdge implements Edge {
 
         String edgesUpdateQuery = "UPDATE edges SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE edge_id=\'" + this.id + "\'";
-        String propertiesInsertQuery = "INSERT IGNORE INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+        String propertiesInsertQuery = "INSERT IGNORE INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "', '" + value.getClass().getSimpleName() + "');";
 
         try {
             PersistentGraph.stmt.executeUpdate(edgesUpdateQuery);
@@ -151,6 +159,11 @@ public class PersistentEdge implements Edge {
         }
 
 //        return properties.remove(key);
+        // 1. Edge의 property를 모두 가지고 와서 hashmap으로 변환하고 함수 내부 변수로 저장
+        // 인자로 들어온 key를 해당 hashmap에서 삭제 및 DB에 업데이트한 사항 적용
+
+        // 2. 애포에 프로퍼티 가지고 올 때 key를 제외하고 가지고 와서
+        // 함수 내부 변수에 해시맵 변수 만들고 DB에 업데이트..???
         return null;
     }
 }
