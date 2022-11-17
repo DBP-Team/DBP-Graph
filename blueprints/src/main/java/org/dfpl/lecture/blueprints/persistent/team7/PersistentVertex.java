@@ -108,8 +108,23 @@ public class PersistentVertex implements Vertex {
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
         }
-        //return properties.remove(key);
-        return null;
+        HashMap<String, Object> map = null;
+        Object returnObj = null;
+        String query = "SELECT properties FROM verticies;";
+        try{
+            ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+            String prop = rs.getString(1);
+            while (rs.next()) {
+                if (prop != null)
+                    map = new ObjectMapper().readValue(prop, HashMap.class);
+            }
+            returnObj = map.remove(key);
+        }catch (SQLException e){
+            System.out.println(e);
+        } catch (Exception e1){
+            System.out.println(e1);
+        }
+        return returnObj;
     }
 
     @Override
@@ -127,7 +142,7 @@ public class PersistentVertex implements Vertex {
         else // Direction.IN
             condition = "inV = ";
 
-        query = "SELECT * FROM edges WHERE " + condition + "\'" + this.id + "\'";
+        query = "SELECT edge_id, inV, label FROM edges WHERE " + condition + "\'" + this.id + "\'";
 
         if (labels.length > 0) {
             query += " AND (";
@@ -146,18 +161,12 @@ public class PersistentVertex implements Vertex {
 
             while (rs.next()) {
                 String edge_id = rs.getString(1);
-                //String outVertexName = rs.getString(2);
-                String inVertexName = rs.getString(3);
-                String label = rs.getString(4);
-//                String prop = rs.getString(5);
+                String inVertexName = rs.getString(2);
+                String label = rs.getString(3);
 
                 Vertex outV = this;
                 Vertex inV = getVertex(inVertexName);
 
-//                if (prop != null) {
-//                    HashMap<String, Object> map = new ObjectMapper().readValue(rs.getString(5), HashMap.class);
-//                    e = new PersistentEdge(edge_id, outV, inV, label, map);
-//                } else
                 Edge e = new PersistentEdge(edge_id, outV, inV, label);
 
                 edgeCollection.add(e);
@@ -172,23 +181,7 @@ public class PersistentVertex implements Vertex {
     }
 
     private Vertex getVertex(String VertexName) throws SQLException, IOException {
-//        HashMap<String, Object> prop = null;
-//        ResultSet rs = PersistentGraph.stmt.executeQuery("SELECT properties FROM verticies WHERE vertex_id =\'" + VertexName + "\';");
-//
-//        try {
-//            if (rs.next())
-//                prop = new ObjectMapper().readValue(rs.getString(1), HashMap.class);
-//            else  // 행 자체가 없을 때 ..?
-//                return null;
-//        } catch (NullPointerException e) {  // properties만 없을 때
-//            Vertex v = new PersistentVertex(VertexName);
-//            return v;
-//        }
-//
-//        Vertex v = new PersistentVertex(VertexName, prop);
-
         Vertex v = new PersistentVertex(VertexName);
-
         return v;
     }
 
