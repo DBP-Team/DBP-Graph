@@ -151,25 +151,25 @@ public class PersistentEdge implements Edge {
     @Override
     public Object removeProperty(String key) {
 
+        HashMap<String, Object> map = null;
+        Object returnObj = null;
+        String query = "SELECT properties FROM edges WHERE edge_id = '" + this.id + "';";
+
         String updateVerticiesQuery = "UPDATE edges SET properties=" +
                 "JSON_REMOVE(properties, \'$." + key + "\') WHERE edge_id=\'" + this.id + "\';";
         String deletePropertiesQuery = "DELETE FROM edge_properties WHERE edge_id = '"
                 + this.id + "' AND key_ = '" + key + "'";
 
-        try {
-            PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
-            PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
-        } catch (SQLException e) {
-            System.out.println("Exception Occur: " + e);
-        }
-
-        HashMap<String, Object> map = null;
-        Object returnObj = null;
-        String query = "SELECT properties FROM edges;";
         try{
             ResultSet rs = PersistentGraph.stmt.executeQuery(query);
-            while (rs.next())
-                map = new ObjectMapper().readValue(rs.getString(1), HashMap.class);
+            PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
+            PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
+
+            String prop = rs.getString(1);
+            while (rs.next()) {
+                if (prop != null)
+                    map = new ObjectMapper().readValue(prop, HashMap.class);
+            }
             returnObj = map.remove(key);
         }catch (SQLException e){
             System.out.println(e);

@@ -94,21 +94,20 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Object removeProperty(String key) {
+
+        HashMap<String, Object> map = null;
+        Object returnObj = null;
+        String query = "SELECT properties FROM verticies WHERE vertex_id = '" + this.id + "';";
+
         String updateVerticiesQuery = "UPDATE verticies SET properties=" +
                 "JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
         String deletePropertiesQuery = "DELETE FROM vertex_properties WHERE vertex_id = '"
                 + this.id + "' AND key_ = '" + key + "'";
-        try {
-            PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
-            PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
-        } catch (SQLException e) {
-            System.out.println("Exception Occur: " + e);
-        }
-        HashMap<String, Object> map = null;
-        Object returnObj = null;
-        String query = "SELECT properties FROM verticies;";
         try{
             ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+            PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
+            PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
+
             String prop = rs.getString(1);
             while (rs.next()) {
                 if (prop != null)
@@ -120,6 +119,7 @@ public class PersistentVertex implements Vertex {
         } catch (Exception e1){
             System.out.println(e1);
         }
+
         return returnObj;
     }
 
@@ -138,7 +138,7 @@ public class PersistentVertex implements Vertex {
         else // Direction.IN
             condition = "inV = ";
 
-        query = "SELECT edge_id, inV, label FROM edges WHERE " + condition + "\'" + this.id + "\'";
+        query = "SELECT edge_id, inV, outV, label FROM edges WHERE " + condition + "\'" + this.id + "\'";
 
         if (labels.length > 0) {
             query += " AND (";
@@ -149,8 +149,9 @@ public class PersistentVertex implements Vertex {
                     query += " OR ";
                 }
             }
-            query += ");";
+            query += ")";
         }
+        query += ";";
 
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(query);
@@ -158,10 +159,19 @@ public class PersistentVertex implements Vertex {
             while (rs.next()) {
                 String edge_id = rs.getString(1);
                 String inVertexName = rs.getString(2);
-                String label = rs.getString(3);
+                String outVertexName = rs.getString(3);
+                String label = rs.getString(4);
 
-                Vertex outV = this;
-                Vertex inV = getVertex(inVertexName);
+                Vertex outV;
+                Vertex inV;
+                if (direction == Direction.OUT) {
+                    outV = this;
+                    inV = getVertex(inVertexName);
+                }
+                else{ // IN
+                    outV = getVertex(outVertexName);
+                    inV = this;
+                }
 
                 Edge e = new PersistentEdge(edge_id, outV, inV, label);
 
