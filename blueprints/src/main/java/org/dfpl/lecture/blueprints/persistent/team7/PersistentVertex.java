@@ -177,8 +177,17 @@ public class PersistentVertex implements Vertex {
     }
 
     private Vertex getVertex(String VertexName) throws SQLException, IOException {
-        Vertex v = new PersistentVertex(VertexName);
-        return v;
+        String query = "SELECT vertex_id FROM verticies WHERE vertex_id = \"" + VertexName + "\";";
+        ResultSet rs = null;
+        try {
+            rs = PersistentGraph.stmt.executeQuery(query);
+            if (rs.next())
+                return (new PersistentVertex(VertexName));
+            else
+                return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

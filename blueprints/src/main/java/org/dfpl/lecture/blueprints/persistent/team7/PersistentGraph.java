@@ -76,8 +76,17 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Vertex getVertex(String id) {
-        Vertex v = new PersistentVertex(id);
-        return v;
+        String query = "SELECT vertex_id FROM verticies WHERE vertex_id = \"" + id + "\";";
+        ResultSet rs = null;
+        try {
+            rs = this.stmt.executeQuery(query);
+            if (rs.next())
+                return (new PersistentVertex(id));
+            else
+                return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
