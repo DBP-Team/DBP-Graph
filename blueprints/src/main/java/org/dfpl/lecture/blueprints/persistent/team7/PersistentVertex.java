@@ -166,10 +166,10 @@ public class PersistentVertex implements Vertex {
                 Vertex inV;
                 if (direction == Direction.OUT) {
                     outV = this;
-                    inV = getVertex(inVertexName);
+                    inV = (new PersistentVertex(inVertexName));
                 }
                 else{ // IN
-                    outV = getVertex(outVertexName);
+                    outV = (new PersistentVertex(outVertexName));
                     inV = this;
                 }
 
@@ -179,25 +179,9 @@ public class PersistentVertex implements Vertex {
             }
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
-        } catch (IOException e) {
-            System.out.println("Exception Occur: " + e);
         }
 
         return edgeCollection;
-    }
-
-    private Vertex getVertex(String VertexName) throws SQLException, IOException {
-        String query = "SELECT vertex_id FROM verticies WHERE vertex_id = \"" + VertexName + "\";";
-        ResultSet rs = null;
-        try {
-            rs = PersistentGraph.stmt.executeQuery(query);
-            if (rs.next())
-                return (new PersistentVertex(VertexName));
-            else
-                return null;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -274,11 +258,9 @@ public class PersistentVertex implements Vertex {
                 ResultSet rs = PersistentGraph.stmt.executeQuery(query);
                 while (rs.next()) {
                     String vId = rs.getString(1);
-                    vCol1.add(getVertex(vId));
+                    vCol1.add((new PersistentVertex(vId)));
                 }
             }catch (SQLException e){
-                System.out.println("Exception Occur: " + e);
-            } catch (IOException e) {
                 System.out.println("Exception Occur: " + e);
             }
         }
@@ -305,11 +287,9 @@ public class PersistentVertex implements Vertex {
 
                 while (rs.next()) {
                     String vId = rs.getString(1);
-                    vCol1.add(getVertex(vId));
+                    vCol1.add((new PersistentVertex(vId)));
                 }
             }catch (SQLException e){
-                System.out.println("Exception Occur: " + e);
-            } catch (IOException e) {
                 System.out.println("Exception Occur: " + e);
             }
         }
