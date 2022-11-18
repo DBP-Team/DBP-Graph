@@ -108,11 +108,13 @@ public class PersistentVertex implements Vertex {
             PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
             PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
 
-            String prop = rs.getString(1);
-            while (rs.next()) {
+            if (rs.next()) {
+                String prop = rs.getString(1);
                 if (prop != null)
                     map = new ObjectMapper().readValue(prop, HashMap.class);
             }
+            else
+                return null; // 사실 도달 할 일 없음
             returnObj = map.remove(key);
         }catch (SQLException e){
             System.out.println(e);
