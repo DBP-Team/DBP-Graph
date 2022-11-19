@@ -47,7 +47,6 @@ public class PersistentGraph implements Graph {
             index를 중지시키곳 싶을 경우
             stmt.executeUpdate("ALTER TABLE edge_properties DISABLE edge_index");
             stmt.executeUpdate("ALTER TABLE vertex_properties DISABLE vertex_index");
-
             현재 index 를 확인하고 싶을 경우
             show index from edge_properties;
             show index from vertex_properties;
@@ -56,8 +55,6 @@ public class PersistentGraph implements Graph {
             System.out.println(e);
         }
     }
-
-    // vertex_id | properties(KEY VALUE)
 
     static boolean isNumeric(String str){
         return str != null && str.matches("[0-9]+");
@@ -70,6 +67,8 @@ public class PersistentGraph implements Graph {
         }
         return Integer.toString(idNum);
     }
+
+    // vertex_id | properties(KEY VALUE)
 
     @Override
     public Vertex addVertex(String id) throws IllegalArgumentException {
@@ -90,11 +89,12 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Vertex getVertex(String id) {
+        if(!isNumeric(id))
+            id = makeIntId(id);
+        String query = "SELECT vertex_id FROM verticies WHERE vertex_id = " + id + ";";
         ResultSet rs = null;
         try {
-            if(!isNumeric(id))
-                id = makeIntId(id);
-            rs = stmt.executeQuery("SELECT vertex_id FROM verticies WHERE vertex_id=" + id + ";");
+            rs = this.stmt.executeQuery(query);
             if (rs.next())
                 return (new PersistentVertex(id));
             else
@@ -107,7 +107,7 @@ public class PersistentGraph implements Graph {
     @Override
     public void removeVertex(Vertex vertex) {
         try {
-            stmt.executeQuery("DELETE FROM verticies WHERE vertex_id=" + vertex.getId() + ";");
+            stmt.executeQuery("DELETE FROM verticies WHERE vertex_id=" + id + ";");
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
         }
@@ -173,7 +173,7 @@ public class PersistentGraph implements Graph {
             return edge;
         try {
             edge = new PersistentEdge(id, outVertex, inVertex, label);
-            String query = "INSERT IGNORE INTO edges VALUES('" + id + "', " + outVertex.getId() + ", " + inVertex.getId() + ", '" + label + "', '{}');";
+            String query = "INSERT IGNORE INTO edges VALUES('" + id + "', '" + outVertex.getId() + "', '" + inVertex.getId() + "', '" + label + "', '{}');";
             stmt.executeUpdate(query);
 
         } catch (SQLException e) {

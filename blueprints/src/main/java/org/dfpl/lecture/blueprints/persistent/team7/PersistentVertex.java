@@ -21,8 +21,6 @@ public class PersistentVertex implements Vertex {
     }
 
     public PersistentVertex(String id) {
-        if(!PersistentGraph.isNumeric(id))
-            id = PersistentGraph.makeIntId(id);
         this.id = id;
     }
 
@@ -77,9 +75,8 @@ public class PersistentVertex implements Vertex {
         if(!PersistentGraph.isNumeric(id))
             id = PersistentGraph.makeIntId(id);
         String verticiesUpdateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
-                " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=" + this.id + "";
-        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', " + this.id + ", " + value.getClass().getSimpleName() + ")";
-
+                " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=" + this.id ;
+        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', " + this.id + ", '" + value.getClass().getSimpleName() + "');";
         try {
             PersistentGraph.stmt.executeUpdate(verticiesUpdateQuery);
             PersistentGraph.stmt.executeUpdate(propertiesInsertQuery);
@@ -101,7 +98,7 @@ public class PersistentVertex implements Vertex {
 
         HashMap<String, Object> map = null;
         Object returnObj = null;
-        String query = "SELECT properties FROM verticies WHERE vertex_id = '" + this.id + "';";
+        String query = "SELECT properties FROM verticies WHERE vertex_id = " + this.id + ";";
 
         String updateVerticiesQuery = "UPDATE verticies SET properties=" +
                 "JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=" + this.id + ";";
@@ -144,7 +141,7 @@ public class PersistentVertex implements Vertex {
         else // Direction.IN
             condition = "inV = ";
 
-        query = "SELECT edge_id, inV, outV, label FROM edges WHERE " + condition  + this.id ;
+        query = "SELECT edge_id, inV, outV, label FROM edges WHERE " + condition + this.id ;
 
         if (labels.length > 0) {
             query += " AND (";
@@ -189,28 +186,7 @@ public class PersistentVertex implements Vertex {
 
         return edgeCollection;
     }
-   /*
-    private Vertex getVertex(String VertexName) throws SQLException, IOException {
-        HashMap<String, Object> prop = null;
-        if(!PersistentGraph.isNumeric(id))
-            id = PersistentGraph.makeIntId(id);
-        ResultSet rs = PersistentGraph.stmt.executeQuery("SELECT properties FROM verticies WHERE vertex_id =" + VertexName + ";");
 
-        try {
-            if (rs.next())
-                prop = new ObjectMapper().readValue(rs.getString(1), HashMap.class);
-            else  // 행 자체가 없을 때 ..?
-                return null;
-        } catch (NullPointerException e) {  // properties만 없을 때
-            Vertex v = new PersistentVertex(VertexName);
-            return v;
-        }
-
-        Vertex v = new PersistentVertex(VertexName, prop);
-
-        return v;
-    }
-    */
     @Override
     public Collection<Vertex> getVertices(Direction direction, String... labels) throws IllegalArgumentException {
         String selectQuery = "";
@@ -330,7 +306,7 @@ public class PersistentVertex implements Vertex {
         if (labels.length != 0) {
             if(direction == Direction.OUT)
                 selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(edge_id, '|', -1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (outV = " + id + ") AND (";
-           else // Direction.IN
+            else // Direction.IN
                 selectQuery = "SELECT vertex_id, properties FROM verticies AS a NATURAL JOIN (SELECT SUBSTRING_INDEX(a.edge_id, '|', 1) AS vertex_id FROM edge_properties WHERE key_ = '" + key + "' AND value_ = '" + value + "' INTERSECT SELECT inV FROM edges AS id WHERE (inV = " + id + ") AND (";
             for (int i = 0; i < labels.length; i++) {
                 selectQuery += " label = '" + labels[i] + "'";
