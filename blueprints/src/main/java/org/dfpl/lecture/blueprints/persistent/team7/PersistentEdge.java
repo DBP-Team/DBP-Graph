@@ -1,11 +1,17 @@
 package org.dfpl.lecture.blueprints.persistent.team7;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.revised.Direction;
 import com.tinkerpop.blueprints.revised.Edge;
 import com.tinkerpop.blueprints.revised.Vertex;
 
+import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 public class PersistentEdge implements Edge {
@@ -13,21 +19,13 @@ public class PersistentEdge implements Edge {
     private Vertex outV;
     private Vertex inV;
     private String label;
-    private HashMap<String, Object> properties;
+//    private HashMap<String, Object> properties;
 
     public PersistentEdge(String id, Vertex outV, Vertex inV, String label) {
         this.id = id;
         this.outV = outV;
         this.inV = inV;
         this.label = label;
-        this.properties = new HashMap<>();
-    }
-    public PersistentEdge(String id, Vertex outV, Vertex inV, String label, HashMap<String, Object> properties) {
-        this.id = id;
-        this.outV = outV;
-        this.inV = inV;
-        this.label = label;
-        this.properties = properties;
     }
 
     @Override
@@ -88,12 +86,43 @@ public class PersistentEdge implements Edge {
 
     @Override
     public Object getProperty(String key) {
-        return properties.get(key);
+        String query = "SELECT value_, value_type FROM edge_properties WHERE key_ = '" + key + "';";
+        Object value = null;
+        try {
+            ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+            while(rs.next()) {
+                if (rs.getString(2).equals("Boolean"))
+                    value = rs.getBoolean(1);
+                else if (rs.getString(2).equals("Integer"))
+                    value = rs.getInt(1);
+                else if (rs.getString(2).equals("Double"))
+                    value = rs.getDouble(1);
+                else // == "String"
+                    value = rs.getString(1);
+            }
+
+        }catch (SQLException e){
+            System.out.println(e);
+        }
+        return value;
     }
 
     @Override
     public Set<String> getPropertyKeys() {
-        return properties.keySet();
+        Set<String> keySet = new HashSet<>();
+
+        String query = "SELECT key_ FROM edge_properties;";
+        try {
+            ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+            while(rs.next()){
+                String key = rs.getString(1);
+                keySet.add(key);
+            }
+        }catch(SQLException e){
+            System.out.println(e);
+        }
+
+        return keySet;
     }
 
     @Override
@@ -101,7 +130,7 @@ public class PersistentEdge implements Edge {
 
         String edgesUpdateQuery = "UPDATE edges SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE edge_id=\'" + this.id + "\'";
-        String propertiesInsertQuery = "INSERT IGNORE INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+        String propertiesInsertQuery = "INSERT IGNORE INTO edge_properties VALUES('" + key + "', '" + value + "', '" + this.id + "', '" + value.getClass().getSimpleName() + "');";
 
         try {
             PersistentGraph.stmt.executeUpdate(edgesUpdateQuery);
@@ -117,24 +146,39 @@ public class PersistentEdge implements Edge {
                 System.out.println(e2);
             }
         }
-
-        properties.put(key, value);
     }
 
     @Override
     public Object removeProperty(String key) {
+
+        HashMap<String, Object> map = null;
+        Object returnObj = null;
+        String query = "SELECT properties FROM edges WHERE edge_id = '" + this.id + "';";
+
         String updateVerticiesQuery = "UPDATE edges SET properties=" +
                 "JSON_REMOVE(properties, \'$." + key + "\') WHERE edge_id=\'" + this.id + "\';";
         String deletePropertiesQuery = "DELETE FROM edge_properties WHERE edge_id = '"
                 + this.id + "' AND key_ = '" + key + "'";
 
-        try {
+        try{
+            ResultSet rs = PersistentGraph.stmt.executeQuery(query);
             PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
             PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
-        } catch (SQLException e) {
-            System.out.println("Exception Occur: " + e);
+
+            if (rs.next()) {
+                String prop = rs.getString(1);
+                if (prop != null)
+                    map = new ObjectMapper().readValue(prop, HashMap.class);
+            }
+            else
+                return null; // 사실 도달 할 일 없음
+            returnObj = map.remove(key);
+        }catch (SQLException e){
+            System.out.println(e);
+        } catch (Exception e1){
+            System.out.println(e1);
         }
 
-        return properties.remove(key);
+        return returnObj;
     }
 }
