@@ -13,21 +13,15 @@ import java.util.*;
 public class PersistentVertex implements Vertex {
 
     private String id;
-    private HashMap<String, Object> properties;
 
     @Override
     public String toString() {
-        return "id: " + id + "keySet" + properties.keySet();
+
+        return "id: " + id + "keySet" + getPropertyKeys();
     }
 
     public PersistentVertex(String id) {
         this.id = id;
-        this.properties = new HashMap<>();
-    }
-
-    public PersistentVertex(String id, HashMap<String, Object> properties) {
-        this.id = id;
-        this.properties = properties;
     }
 
     @Override
@@ -37,19 +31,50 @@ public class PersistentVertex implements Vertex {
 
     @Override
     public Object getProperty(String key) {
-        return properties.get(key);
+        String query = "SELECT value_, value_type FROM vertex_properties WHERE key_ = '" + key + "';";
+        Object value = null;
+        try{
+            ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+            while(rs.next()) {
+                if (rs.getString(2).equals("Boolean"))
+                    value = rs.getBoolean(1);
+                else if (rs.getString(2).equals("Integer"))
+                    value = rs.getInt(1);
+                else if (rs.getString(2).equals("Double"))
+                    value = rs.getDouble(1);
+                else // == "String"
+                    value = rs.getString(1);
+            }
+        }catch (SQLException e){
+            System.out.println(e);
+        }
+        return value;
     }
 
     @Override
     public Set<String> getPropertyKeys() {
-        return properties.keySet();
+
+        Set<String> keySet = new HashSet<>();
+
+        String query = "SELECT key_ FROM vertex_properties;";
+        try {
+            ResultSet rs = PersistentGraph.stmt.executeQuery(query);
+            while(rs.next()){
+                String key = rs.getString(1);
+                keySet.add(key);
+            }
+        }catch(SQLException e){
+            System.out.println(e);
+        }
+
+        return keySet;
     }
 
     @Override
     public void setProperty(String key, Object value) {
         String verticiesUpdateQuery = "UPDATE verticies SET properties=JSON_SET(properties," +
                 " \'$." + key + "\', \'" + value + "\') WHERE vertex_id=\'" + this.id + "\'";
-        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "')";
+        String propertiesInsertQuery = "INSERT IGNORE INTO vertex_properties VALUES('" + key + "', '" + value + "', '" + this.id + "', '" + value.getClass().getSimpleName() + "');";
 
         try {
             PersistentGraph.stmt.executeUpdate(verticiesUpdateQuery);
@@ -65,22 +90,39 @@ public class PersistentVertex implements Vertex {
                 System.out.println(e2);
             }
         }
-        properties.put(key, value);
     }
 
     @Override
     public Object removeProperty(String key) {
+
+        HashMap<String, Object> map = null;
+        Object returnObj = null;
+        String query = "SELECT properties FROM verticies WHERE vertex_id = '" + this.id + "';";
+
         String updateVerticiesQuery = "UPDATE verticies SET properties=" +
                 "JSON_REMOVE(properties, \'$." + key + "\') WHERE vertex_id=\'" + this.id + "\';";
         String deletePropertiesQuery = "DELETE FROM vertex_properties WHERE vertex_id = '"
                 + this.id + "' AND key_ = '" + key + "'";
-        try {
+        try{
+            ResultSet rs = PersistentGraph.stmt.executeQuery(query);
             PersistentGraph.stmt.executeUpdate(updateVerticiesQuery);
             PersistentGraph.stmt.executeUpdate(deletePropertiesQuery);
-        } catch (SQLException e) {
-            System.out.println("Exception Occur: " + e);
+
+            if (rs.next()) {
+                String prop = rs.getString(1);
+                if (prop != null)
+                    map = new ObjectMapper().readValue(prop, HashMap.class);
+            }
+            else
+                return null; // 사실 도달 할 일 없음
+            returnObj = map.remove(key);
+        }catch (SQLException e){
+            System.out.println(e);
+        } catch (Exception e1){
+            System.out.println(e1);
         }
-        return properties.remove(key);
+
+        return returnObj;
     }
 
     @Override
@@ -98,7 +140,7 @@ public class PersistentVertex implements Vertex {
         else // Direction.IN
             condition = "inV = ";
 
-        query = "SELECT * FROM edges WHERE " + condition + "\'" + this.id + "\'";
+        query = "SELECT edge_id, inV, outV, label FROM edges WHERE " + condition + "\'" + this.id + "\'";
 
         if (labels.length > 0) {
             query += " AND (";
@@ -109,58 +151,39 @@ public class PersistentVertex implements Vertex {
                     query += " OR ";
                 }
             }
-            query += ");";
+            query += ")";
         }
+        query += ";";
 
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(query);
-            Edge e = null;
 
             while (rs.next()) {
                 String edge_id = rs.getString(1);
-                //String outVertexName = rs.getString(2);
-                String inVertexName = rs.getString(3);
+                String inVertexName = rs.getString(2);
+                String outVertexName = rs.getString(3);
                 String label = rs.getString(4);
-                String prop = rs.getString(5);
 
-                Vertex outV = this;
-                Vertex inV = getVertex(inVertexName);
+                Vertex outV;
+                Vertex inV;
+                if (direction == Direction.OUT) {
+                    outV = this;
+                    inV = (new PersistentVertex(inVertexName));
+                }
+                else{ // IN
+                    outV = (new PersistentVertex(outVertexName));
+                    inV = this;
+                }
 
-                if (prop != null) {
-                    HashMap<String, Object> map = new ObjectMapper().readValue(rs.getString(5), HashMap.class);
-                    e = new PersistentEdge(edge_id, outV, inV, label, map);
-                } else
-                    e = new PersistentEdge(edge_id, outV, inV, label);
+                Edge e = new PersistentEdge(edge_id, outV, inV, label);
 
                 edgeCollection.add(e);
             }
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
-        } catch (IOException e) {
-            System.out.println("Exception Occur: " + e);
         }
-
 
         return edgeCollection;
-    }
-
-    private Vertex getVertex(String VertexName) throws SQLException, IOException {
-        HashMap<String, Object> prop = null;
-        ResultSet rs = PersistentGraph.stmt.executeQuery("SELECT properties FROM verticies WHERE vertex_id =\'" + VertexName + "\';");
-
-        try {
-            if (rs.next())
-                prop = new ObjectMapper().readValue(rs.getString(1), HashMap.class);
-            else  // 행 자체가 없을 때 ..?
-                return null;
-        } catch (NullPointerException e) {  // properties만 없을 때
-            Vertex v = new PersistentVertex(VertexName);
-            return v;
-        }
-
-        Vertex v = new PersistentVertex(VertexName, prop);
-
-        return v;
     }
 
     @Override
@@ -181,20 +204,16 @@ public class PersistentVertex implements Vertex {
             selectQuery += " )";
         }
         selectQuery += ") AS a";
-        //System.out.println(selectQuery);
         Collection<Vertex> verticies = new ArrayList<Vertex>();
         try {
             ResultSet rs = PersistentGraph.stmt.executeQuery(selectQuery);
             HashMap<String, Object> map = null;
             while (rs.next()) {
                 String vertexId = rs.getString(1);
-                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
-                verticies.add(new PersistentVertex(vertexId, map));
+                verticies.add(new PersistentVertex(vertexId));
             }
         } catch (SQLException exception) {
             System.out.println(exception);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
         return verticies;
@@ -241,11 +260,9 @@ public class PersistentVertex implements Vertex {
                 ResultSet rs = PersistentGraph.stmt.executeQuery(query);
                 while (rs.next()) {
                     String vId = rs.getString(1);
-                    vCol1.add(getVertex(vId));
+                    vCol1.add((new PersistentVertex(vId)));
                 }
             }catch (SQLException e){
-                System.out.println("Exception Occur: " + e);
-            } catch (IOException e) {
                 System.out.println("Exception Occur: " + e);
             }
         }
@@ -272,11 +289,9 @@ public class PersistentVertex implements Vertex {
 
                 while (rs.next()) {
                     String vId = rs.getString(1);
-                    vCol1.add(getVertex(vId));
+                    vCol1.add((new PersistentVertex(vId)));
                 }
             }catch (SQLException e){
-                System.out.println("Exception Occur: " + e);
-            } catch (IOException e) {
                 System.out.println("Exception Occur: " + e);
             }
         }
@@ -313,14 +328,11 @@ public class PersistentVertex implements Vertex {
             HashMap<String, Object> map = null;
             while (rs.next()) {
                 String vertexId = rs.getString(1);
-                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
-                verticies.add(new PersistentVertex(vertexId, map));
+                verticies.add(new PersistentVertex(vertexId));
             }
         } catch (SQLException e) {
             System.out.println(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
+        }catch (Exception e) {
             System.out.println(e);
         }
 
@@ -336,6 +348,4 @@ public class PersistentVertex implements Vertex {
             System.out.println("Exception Occur: " + e);
         }
     }
-
-
 }

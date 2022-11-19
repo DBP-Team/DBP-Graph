@@ -33,9 +33,9 @@ public class PersistentGraph implements Graph {
             stmt.executeUpdate("USE " + dbName);
             stmt.executeUpdate("CREATE OR REPLACE TABLE verticies (vertex_id varchar(50) PRIMARY KEY, properties json)");
             stmt.executeUpdate("CREATE OR REPLACE TABLE edges (edge_id varchar(50) PRIMARY KEY, outV varchar(50), inV varchar(50), label varchar(50), properties json);");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50), " +
+            stmt.executeUpdate("CREATE OR REPLACE TABLE vertex_properties (key_ varchar(50), value_ varchar(50), vertex_id varchar(50), value_type varchar(10), " +
                     "FOREIGN KEY (vertex_id) REFERENCES verticies (vertex_id) ON DELETE CASCADE, PRIMARY KEY (vertex_id, key_));");
-            stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50), " +
+            stmt.executeUpdate("CREATE OR REPLACE TABLE edge_properties (key_ varchar(50), value_ varchar(50), edge_id varchar(50), value_type varchar(10), " +
                     "FOREIGN KEY (edge_id) REFERENCES edges (edge_id) ON DELETE CASCADE, PRIMARY KEY (edge_id, key_));");
             stmt.executeUpdate("CREATE INDEX edges_index1 ON edges (inV)");
             stmt.executeUpdate("CREATE INDEX edges_index2 ON edges (outV)");
@@ -76,35 +76,17 @@ public class PersistentGraph implements Graph {
 
     @Override
     public Vertex getVertex(String id) {
-        /**
-         * mariaDB에서 vertices 값들을 불러와서
-         * 그 중 properties를 바로 HashMap으로 변환시켜주고
-         * MyVertex 생성자에 같이 넣어줍니다.
-         */
-        HashMap<String, Object> map = null;
+        String query = "SELECT vertex_id FROM verticies WHERE vertex_id = \"" + id + "\";";
+        ResultSet rs = null;
         try {
-            ResultSet rs = stmt.executeQuery("SELECT * FROM verticies WHERE vertex_id=\'" + id + "\';");
+            rs = this.stmt.executeQuery(query);
             if (rs.next())
-                map = new ObjectMapper().readValue(rs.getString("properties"), HashMap.class);
+                return (new PersistentVertex(id));
             else
                 return null;
-        } catch (NullPointerException e) {
-            /**
-             * new ObjectMapper().readValue(null, HashMap.class); 시 NullPointerException
-             */
-            Vertex v = new PersistentVertex(id);
-            return v;
-        } catch (Exception e) {
-            System.out.println("Exception Occur: " + e);
-            /**
-             * JsonMappingException
-             * JsonParseException
-             * IOException
-             */
-            System.out.println("occur Exception: " + e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        Vertex v = new PersistentVertex(id, map);
-        return v;
     }
 
     @Override
@@ -123,20 +105,12 @@ public class PersistentGraph implements Graph {
 
         Collection<Vertex> arrayList = new ArrayList<Vertex>();
         try {
-            ResultSet rs = stmt.executeQuery("SELECT * FROM verticies;");
-            HashMap propertiesMap = null;
+            ResultSet rs = stmt.executeQuery("SELECT vertex_id FROM verticies;");
             while (rs.next()) {
                 String id = rs.getString(1);
-                String properties = rs.getString(2);
-                if (properties != null) {
-                    propertiesMap = new ObjectMapper().readValue(properties, HashMap.class);
-                }
-                arrayList.add(new PersistentVertex(id, propertiesMap));
-//                arrayList.add(this.getVertex(rs.getString(1)));
+                arrayList.add(new PersistentVertex(id));
             }
-        } catch (SQLException e) {
-            System.out.println("Exception Occur: " + e);
-        } catch (IOException e) {
+        }catch (SQLException e){
             System.out.println("Exception Occur: " + e);
         }
 
@@ -220,24 +194,15 @@ public class PersistentGraph implements Graph {
                 String outVertexString = rs.getString(2);
                 String inVertexString = rs.getString(3);
                 String label = rs.getString(4);
-                String properties = rs.getString(5);
-                if (properties != null) {
-                    propertiesMap = new ObjectMapper().readValue(properties, HashMap.class);
-                }
+
                 Vertex outVertex = getVertex(outVertexString);
                 Vertex inVertex = getVertex(inVertexString);
 
-                return (new PersistentEdge(id, outVertex, inVertex, label, propertiesMap));
+                return (new PersistentEdge(id, outVertex, inVertex, label));
             } else
                 return null;
         } catch (SQLException e) {
             System.out.println("Exception Occur: " + e);
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonParseException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
         return null;
     }
